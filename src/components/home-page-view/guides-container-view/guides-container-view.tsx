@@ -1,12 +1,16 @@
 import React, {Component} from "react";
-import Header from "../../header/header";
-import Footer from "../../footer/footer";
-import GuideCard from "../guide-card/guide-card";
+import HeaderComponent from "../../header-component/header-component";
+import FooterComponent from "../../footer-component/footer-component";
+import GuideCardComponent from "../guide-card-component/guide-card-component";
 import Guide from "../../../interfaces/guide";
 import {getAllGuides} from "../../../services/guides";
-import './guide-container.sass';
 
-export default class GuidesContainer extends Component {
+interface State {
+    guides: Array<Guide>;
+}
+
+export default class GuidesContainerView extends Component<{}, State> {
+
     state = {
         guides: []
     };
@@ -19,21 +23,22 @@ export default class GuidesContainer extends Component {
     render() {
         return (
             <div>
-                <Header />
-                <div className="album py-5">
+                <HeaderComponent />
+                <div className="album margin-after-header py-5">
                     <div className="container">
                         <div className="row">
                             {this.state.guides.map((guide: Guide, i) => {
                                 return(
-                                    <GuideCard
+                                    <GuideCardComponent
                                         imageName={guide.imageName} name={guide.name}
                                         description={guide.description} id={guide.id} key={i}
-                                    />);
+                                    />
+                                );
                             })}
                         </div>
                     </div>
                 </div>
-                <Footer />
+                <FooterComponent />
             </div>
         );
     }

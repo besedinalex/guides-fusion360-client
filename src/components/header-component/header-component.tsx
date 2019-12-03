@@ -1,8 +1,9 @@
 import React, {Component} from "react";
 import {Link} from "react-router-dom";
-import './header.sass';
+import './header-component.sass';
 
-export default class Header extends Component {
+export default class HeaderComponent extends Component {
+
     render() {
         return(
             <header className="navbar navbar-expand-lg py-1 navbar-dark fixed-top">

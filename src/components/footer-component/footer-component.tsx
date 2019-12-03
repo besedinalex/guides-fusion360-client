@@ -1,7 +1,8 @@
 import React, {Component} from "react";
-import './footer.sass';
+import './footer-component.sass';
 
-export default class Footer extends Component {
+export default class FooterComponent extends Component {
+
     render() {
         return(
             <footer className="bg-dark py-2">
