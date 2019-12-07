@@ -5,8 +5,8 @@ import './header-component.sass';
 export default class HeaderComponent extends Component {
 
     render() {
-        return(
-            <header className="navbar navbar-expand-lg py-1 navbar-dark fixed-top">
+        return (
+            <header className="navbar navbar-expand-lg py-2 navbar-dark fixed-top">
                 <Link to="/" className="navbar-brand">FUSION360GUIDE</Link>
                 <button className="navbar-toggler" type="button" data-toggle="collapse"
                         data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
@@ -20,12 +20,12 @@ export default class HeaderComponent extends Component {
                         {/*    <Link to="/" className="nav-link">Создать</Link>*/}
                         {/*</li>*/}
                     </ul>
-                    {/*<Link to="/">*/}
-                    {/*    <button className="btn btn-primary margin-right">Регистрация</button>*/}
-                    {/*</Link>*/}
-                    {/*<Link to="/">*/}
-                    {/*    <button className="btn btn-light">Войти</button>*/}
-                    {/*</Link>*/}
+                    <Link to="/signup">
+                        <button className="btn btn-primary margin-right">Регистрация</button>
+                    </Link>
+                    <Link to="/login">
+                        <button className="btn btn-light">Войти</button>
+                    </Link>
                 </div>
             </header>
 
