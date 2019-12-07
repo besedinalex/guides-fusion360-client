@@ -74,7 +74,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
 
     render() {
         if (this.state.redirect) {
-            return <Redirect to={'/'} />
+            return <Redirect to="/page404" />
         }
         return (
             <div>

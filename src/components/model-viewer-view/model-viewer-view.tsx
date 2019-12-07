@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {RouteComponentProps} from "react-router";
-import {Link} from "react-router-dom";
+import {Link, Redirect} from "react-router-dom";
 import * as THREE from 'three';
 import {TrackballControls} from 'three/examples/jsm/controls/TrackballControls';
 import {MTLLoader} from 'three/examples/jsm/loaders/MTLLoader';
@@ -9,11 +9,11 @@ import './model-viewer-view.sass';
 import {serverURL} from "../../services/server-address";
 import ModelAnnotation from "../../interfaces/model-annotation";
 import {getModelAnnotations} from "../../services/model-annotations";
-import annotations from "../../../../guides-fusion360-server/src/requests/http/model-annotations";
 
 interface State {
     modelId: number;
     annotations: Array<ModelAnnotation>;
+    redirect: boolean;
 }
 
 export default class ModelViewerView extends Component<RouteComponentProps, State> {
@@ -33,7 +33,8 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         this.state = {
             // @ts-ignore
             modelId: this.props.match.params.id,
-            annotations: []
+            annotations: [],
+            redirect: false
         };
     }
 
@@ -41,6 +42,21 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         this.animationStopped = false;
 
         this.scene = new THREE.Scene();
+
+        new MTLLoader().load(`${serverURL}/models/${this.state.modelId}/model.mtl`,
+            (materials) => {
+                materials.preload();
+                const objLoader = new OBJLoader();
+                objLoader.setMaterials(materials);
+                objLoader.load(`${serverURL}/models/${this.state.modelId}/model.obj`,
+                    mesh => this.scene.add(mesh),
+                    () => {},
+                    () => this.setState({redirect: true})
+                );
+            },
+            () => {},
+            () => this.setState({redirect: true})
+        );
 
         const ambient = new THREE.AmbientLight(0xffffff, 1.0);
         this.scene.add(ambient);
@@ -56,15 +72,6 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         const backLight = new THREE.DirectionalLight(0xffffff, 1.0);
         backLight.position.set(100, 0, -100).normalize();
         this.scene.add(backLight);
-
-        new MTLLoader().load(`${serverURL}/models/${this.state.modelId}/model.mtl`, (materials) => {
-            materials.preload();
-            const objLoader = new OBJLoader();
-            objLoader.setMaterials(materials);
-            objLoader.load(`${serverURL}/models/${this.state.modelId}/model.obj`, (mesh) => {
-                this.scene.add(mesh);
-            });
-        });
 
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -100,7 +107,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         this.controls = undefined;
         this.mouse = undefined;
         this.animationStopped = true;
-        this.host.removeEventListener('click', this.getCoordinatesOfClick);
+        this.host = undefined;
         window.removeEventListener('resize', this.onWindowResize);
     }
 
@@ -182,6 +189,9 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
     }
 
     render() {
+        if (this.state.redirect) {
+            return <Redirect to="/page404" />
+        }
         return (
             <div ref={(host) => this.host = host} onClick={this.getCoordinatesOfClick}>
                 <Link to="/" className="viewer-btn home">
