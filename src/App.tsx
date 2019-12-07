@@ -9,6 +9,8 @@ import ModelViewerView from "./components/model-viewer-view/model-viewer-view";
 import SignInAuthView from "./components/auth-view/sign-in-auth-view/sign-in-auth-view";
 import Page404View from "./components/page-404-view/page-404-view";
 import SignUpAuthView from "./components/auth-view/signup-auth-view/sign-up-auth-view";
+import CreateGuideView from "./components/guide-view/create-guide-view/create-guide-view";
+import EditGuideView from "./components/guide-view/edit-guide-view/edit-guide-view";
 
 export default class App extends Component {
     render() {
@@ -19,6 +21,8 @@ export default class App extends Component {
                         <Route exact path="/" component={GuidesContainerView} />
                         <Route path="/guide/:id" component={ViewGuideView} />
                         <Route path="/model/:id" component={ModelViewerView} />
+                        <Route path="/edit/:id" component={EditGuideView} />
+                        <Route path="/create" component={CreateGuideView} />
                         <Route path="/login" component={SignInAuthView} />
                         <Route path="/signup" component={SignUpAuthView} />
                         <Route component={Page404View} />

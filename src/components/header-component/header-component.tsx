@@ -16,9 +16,9 @@ export default class HeaderComponent extends Component {
 
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav mr-auto">
-                        {/*<li className="nav-item">*/}
-                        {/*    <Link to="/" className="nav-link">Создать</Link>*/}
-                        {/*</li>*/}
+                        <li className="nav-item">
+                            <Link to="/create" className="nav-link">Создать</Link>
+                        </li>
                     </ul>
                     <Link to="/signup">
                         <button className="btn btn-primary margin-right">Регистрация</button>
