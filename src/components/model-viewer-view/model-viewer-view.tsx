@@ -7,18 +7,13 @@ import {MTLLoader} from 'three/examples/jsm/loaders/MTLLoader';
 import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader';
 import './model-viewer-view.sass';
 import {serverURL} from "../../services/server-address";
+import ModelAnnotation from "../../interfaces/model-annotation";
+import {getModelAnnotations} from "../../services/model-annotations";
+import annotations from "../../../../guides-fusion360-server/src/requests/http/model-annotations";
 
 interface State {
     modelId: number;
-    annotations: Array<Annotation>;
-}
-
-interface Annotation {
-    index: number;
-    x: number;
-    y: number;
-    z: number;
-    text: string;
+    annotations: Array<ModelAnnotation>;
 }
 
 export default class ModelViewerView extends Component<RouteComponentProps, State> {
@@ -74,7 +69,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setClearColor(new THREE.Color('hsl(0, 0%, 10%)'));
+        this.renderer.setClearColor(new THREE.Color(0xaaaaaa));
         this.host.appendChild(this.renderer.domElement);
 
         this.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100000);
@@ -88,6 +83,12 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         this.mouse = new THREE.Vector2();
 
         window.addEventListener('resize', this.onWindowResize);
+
+        getModelAnnotations(this.state.modelId)
+            .then(annotations => {
+                annotations.map((annotation, i) => annotation.index = i + 1);
+                this.setState({annotations: annotations});
+            });
 
         this.animate();
     }
@@ -112,7 +113,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         this.renderer.render(this.scene, this.camera);
         const width = this.renderer.domElement.width / 2 / window.devicePixelRatio;
         const height = this.renderer.domElement.height / 2 / window.devicePixelRatio;
-        for (const obj of this.state.annotations as Array<Annotation>) {
+        for (const obj of this.state.annotations as Array<ModelAnnotation>) {
             const p2 = new THREE.Vector3(obj.x, obj.y, obj.z);
             const annotation = document.querySelector('#annotation-' + obj.index) as HTMLFormElement;
             const annotationIndex = document.querySelector('#annotation-index-' + obj.index) as HTMLFormElement;
@@ -189,6 +190,23 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
                 <Link to={`/guide/${this.state.modelId}`} className="viewer-btn return">
                     <img className="viewer-btn-img" src={require('../../assets/return.png')} alt="Return to guide" />
                 </Link>
+
+                {this.state.annotations.map(annotation => {
+                    const i = annotation.index;
+                    return (
+                        <div id={`annotation-${i}`} className="annotation hidden" key={i}>
+                            <span id={`annotation-text-${i}`} />
+                        </div>
+                    );
+                })}
+                {this.state.annotations.map(annotation => {
+                    const i = annotation.index;
+                    return (
+                        <div id={`annotation-index-${i}`} className="annotation-number" onClick={() => this.hideAnnotation(i)} key={i}>
+                            {i}
+                        </div>
+                    );
+                })}
             </div>
         );
     }
