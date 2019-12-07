@@ -1,3 +1,17 @@
+# Beginner's guides to Fusion 360
+
+This small web site was created for very beginners (especially pupils) who have never worked with [Autodesk Fusion 360](https://www.autodesk.com/products/fusion-360/overview). Content of the site was made by students of [Moscow Polytechnic University](https://mospolytech.ru).
+
+Every guide may have different quality and usefulness depending on who exactly made the one.
+
+This site is the new version of an [old project](https://github.com/BesedinAlex/guides-fusion360-old) which was abandoned due to some reasons. It also uses data from server, that is developed in private repository.
+
+## Basic stuff
+
+The site is made with [React](https://reactjs.org) using [TypeScript](https://www.typescriptlang.org). Also [Bootstrap](https://getbootstrap.com) is used for visual stuff and [Three.js](https://threejs.org) for 3D viewer. To work with site:
+
+Run `npm i typescript -g` to get TypeScript.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
