@@ -47,7 +47,6 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
 
     fillModalWindow(part: PartGuide) {
         this.setState({currentGuideName: part.name});
-        // this.setState({currentGuideContent: []});
         let content = [];
         const parsedContent = part.content.split('^');
         for (const line of parsedContent) {
@@ -96,7 +95,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                             );
                         })}
                         <li className="px-2 py-2">
-                            <Link to="" className="btn btn-warning text-white">Посмотреть в 3D</Link>
+                            <Link to={`/model/${this.state.guideId}`} className="btn btn-warning text-white">Посмотреть в 3D</Link>
                         </li>
                     </ul>
                 </div>
