@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import {Link} from "react-router-dom";
 import './header-component.sass';
+import {handleSigningOut, isAuthenticated} from "../../services/authentication";
 
 export default class HeaderComponent extends Component {
 
@@ -16,16 +17,19 @@ export default class HeaderComponent extends Component {
 
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav mr-auto">
-                        <li className="nav-item">
+                        <li hidden={!isAuthenticated} className="nav-item">
                             <Link to="/create" className="nav-link">Создать</Link>
                         </li>
                     </ul>
-                    <Link to="/signup">
+                    <Link to="/signup" hidden={isAuthenticated}>
                         <button className="btn btn-primary margin-right">Регистрация</button>
                     </Link>
-                    <Link to="/login">
+                    <Link to="/login" hidden={isAuthenticated}>
                         <button className="btn btn-light">Войти</button>
                     </Link>
+                    <button onClick={handleSigningOut} hidden={!isAuthenticated} className="btn btn-danger">
+                        Выйти
+                    </button>
                 </div>
             </header>
 
