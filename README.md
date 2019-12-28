@@ -4,13 +4,19 @@ This small web site was created for very beginners (especially pupils) who have 
 
 Every guide may have different quality and usefulness depending on who exactly made the one.
 
-This site is the new version of an [old project](https://github.com/BesedinAlex/guides-fusion360-old) which was abandoned due to some reasons. It also uses data from server, that is developed in private repository.
+This site is the new version of an [old project](https://github.com/BesedinAlex/guides-fusion360-old) which was abandoned due to some reasons. It also uses data from server, that is developed in [separate repository](https://github.com/BesedinAlex/guides-fusion360-server).
 
 ## Basic stuff
 
-The site is made with [React](https://reactjs.org) using [TypeScript](https://www.typescriptlang.org). Also [Bootstrap](https://getbootstrap.com) is used for visual stuff and [Three.js](https://threejs.org) for 3D viewer. To work with site:
+The site is made with [React](https://reactjs.org) using [TypeScript](https://www.typescriptlang.org). Also [Bootstrap](https://getbootstrap.com) is used for visual stuff and [Three.js](https://threejs.org) for 3D viewer.
+
+### Setup
+
+Install Node.js from their [site](https://nodejs.org/en/download).
 
 Run `npm i typescript -g` to get TypeScript.
+
+Make sure that your CLI now handles `node`, `npm`, `tsc` commands.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
