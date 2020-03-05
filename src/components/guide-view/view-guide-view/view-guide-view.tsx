@@ -45,32 +45,32 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
         });
     }
 
-    fillModalWindow(part: PartGuide) {
-        this.setState({currentGuideName: part.name});
-        let content = [];
-        const parsedContent = part.content.split('^');
-        for (const line of parsedContent) {
-            if (/[0-9]+\.(?:jpg|png|JPG|PNG)$/gi.test(line)) { // Image
-                const link = `${serverURL}/images/guide/${this.state.guideId}/${line}`;
-                content.push({data: link, code: 'img'});
-            } else if (/https?:\/\/(www\.)?(\w+\.)+(\w+)(\/(\w+|\?*|=*|\.)+)*/gi.test(line)) { // YouTube Video
-                content.push({data: line, code: 'video'});
-            } else if (/parts\.zip/gi.test(line)) { // .zip file
-                const link = `${serverURL}/models/${this.state.guideId}/parts.zip`;
-                content.push({data: link, code: 'parts'});
-            } else if (line.length > 0) { // Text
-                content.push({data: line, code: 'text'});
-            }
-        }
-        this.setState({currentGuideContent: content});
-    };
-
-    getImgId(data: string): number {
-        // @ts-ignore
-        const filename = data.match(/[0-9]+\.(?:jpg|png|JPG|PNG)$/gi)[0];
-        const id = filename.slice(0, filename.length - 4);
-        return Number(id);
-    }
+    // fillModalWindow(part: PartGuide) {
+    //     this.setState({currentGuideName: part.name});
+    //     let content = [];
+    //     const parsedContent = part.content.split('^');
+    //     for (const line of parsedContent) {
+    //         if (/[0-9]+\.(?:jpg|png|JPG|PNG)$/gi.test(line)) { // Image
+    //             const link = `${serverURL}/images/guide/${this.state.guideId}/${line}`;
+    //             content.push({data: link, code: 'img'});
+    //         } else if (/https?:\/\/(www\.)?(\w+\.)+(\w+)(\/(\w+|\?*|=*|\.)+)*/gi.test(line)) { // YouTube Video
+    //             content.push({data: line, code: 'video'});
+    //         } else if (/parts\.zip/gi.test(line)) { // .zip file
+    //             const link = `${serverURL}/models/${this.state.guideId}/parts.zip`;
+    //             content.push({data: link, code: 'parts'});
+    //         } else if (line.length > 0) { // Text
+    //             content.push({data: line, code: 'text'});
+    //         }
+    //     }
+    //     this.setState({currentGuideContent: content});
+    // };
+    //
+    // getImgId(data: string): number {
+    //     // @ts-ignore
+    //     const filename = data.match(/[0-9]+\.(?:jpg|png|JPG|PNG)$/gi)[0];
+    //     const id = filename.slice(0, filename.length - 4);
+    //     return Number(id);
+    // }
 
     render() {
         if (this.state.redirect) {
@@ -88,7 +88,9 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                             return (
                                 <li className="px-2 py-2" key={i}>
                                     <button className="btn btn-success" data-toggle="modal"
-                                            data-target="#modal" onClick={() => this.fillModalWindow(guide)}>
+                                            data-target="#modal"
+                                            // onClick={() => this.fillModalWindow(guide)}
+                                    >
                                         {guide.name}
                                     </button>
                                 </li>
@@ -102,47 +104,13 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
 
                 <div className="modal fade" id="modal" tabIndex={-1} role="dialog" aria-labelledby="exampleModalLabel"
                      aria-hidden="true">
-                    <div className="modal-dialog modal-xl" role="document">
-                        <div className="modal-content">
+                    <div className="modal-dialog modal-xl h-90" role="document">
+                        <div className="modal-content h-100">
                             <div className="modal-header">
-                                <h5 className="modal-title" id="modal-title">{this.state.currentGuideName}</h5>
+                                <h5 className="modal-title" id="modal-title">{this.state.currentGuideName} Test</h5>
                             </div>
-                            <div className="modal-body" id="modal-body">
-                                {this.state.currentGuideContent.map((part: GuideContent, i) => {
-                                    switch (part.code) {
-                                        case 'img':
-                                            return (
-                                                <div className="body align-items-center flex-column d-flex" key={i}>
-                                                    <img className="img" src={part.data}
-                                                         alt="Visual presentation of above text." />
-                                                    <p>Рис. {this.getImgId(part.data)}</p>
-                                                </div>
-                                            );
-                                        case 'video':
-                                            return (
-                                                <div className="body align-items-center flex-column d-flex" key={i}>
-                                                    <div className="embed-responsive embed-responsive-16by9">
-                                                        <iframe className="embed-responsive-item" src={part.data}
-                                                                title="video" />
-                                                    </div>
-                                                </div>
-                                            );
-                                        case 'parts':
-                                            return (
-                                                <div className="body align-items-center flex-column d-flex" key={i}>
-                                                    <a href={part.data} download="Готовые детали.zip">Готовые детали</a>
-                                                    <br />
-                                                </div>
-                                            );
-                                        case 'text':
-                                            return (
-                                                <div className="body align-items-center flex-column d-flex" key={i}>
-                                                    <p className="text">{part.data}</p>
-                                                </div>
-                                            );
-                                        default: return null;
-                                    }
-                                })}
+                            <div className="modal-body guide-modal" id="modal-body">
+                                <iframe src={'http://localhost:4004/images/file.pdf#view=fitH&toolbar=0'} className="w-100 h-100" />
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-danger" data-dismiss="modal">Закрыть</button>
