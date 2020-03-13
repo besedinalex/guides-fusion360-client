@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {Link, Redirect} from "react-router-dom";
-import {handleSigningIn} from "../../../services/authentication";
+import {getToken} from "../../../services/user-data";
 import '../auth-view.sass';
 
 interface State {
@@ -23,7 +23,7 @@ export default class SignInAuthView extends Component<{}, State> {
 
     signIn = (event) => {
         event.preventDefault();
-        handleSigningIn(this.state.email, this.state.password)
+        getToken(this.state.email, this.state.password)
             .then(() => this.setState({redirect: true}))
             .catch(() => alert("Неверный email или пароль."));
     };

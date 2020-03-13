@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import {Link, Redirect} from "react-router-dom";
 import '../auth-view.sass';
-import {handleSigningUp} from "../../../services/authentication";
+import {postNewUser} from "../../../services/user-data";
 
 interface State {
     email: string;
@@ -39,7 +39,7 @@ export default class SignUpAuthView extends Component<{}, State> {
 
     signUp = (event) => {
         event.preventDefault();
-        handleSigningUp(this.state.firstName, this.state.lastName, this.state.email,
+        postNewUser(this.state.firstName, this.state.lastName, this.state.email,
             this.state.password, this.state.inviteCode, this.state.group)
             .then(() => this.setState({redirect: true}))
             .catch(() => alert('Регистрация не удалась.'));
