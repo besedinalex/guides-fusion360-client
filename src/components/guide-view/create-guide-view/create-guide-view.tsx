@@ -1,11 +1,14 @@
 import React, {Component} from "react";
 import HeaderComponent from "../../header-component/header-component";
 import './create-guide-view.sass';
+import {postNewGuide} from "../../../services/guides";
+import {Redirect} from "react-router-dom";
 
 interface State {
     name: string;
     description: string;
     img: any;
+    redirect: boolean;
 }
 
 export default class CreateGuideView extends Component<{}, State> {
@@ -14,7 +17,8 @@ export default class CreateGuideView extends Component<{}, State> {
     state = {
         name: '',
         description: '',
-        img: require('../../../assets/logo250.jpg')
+        img: require('../../../assets/logo250.jpg'),
+        redirect: false
     };
 
     componentDidMount() {
@@ -33,7 +37,17 @@ export default class CreateGuideView extends Component<{}, State> {
 
     handleDescriptionChange = (event) => this.setState({description: event.target.value});
 
+    handleSubmit = (event) => {
+        event.preventDefault();
+        postNewGuide(this.state.name, this.state.description, this.imgInput.current.files[0])
+            .then(() => this.setState({redirect: true}))
+            .catch(() => alert('Не удалось создать гайд.'));
+    };
+
     render() {
+        if (this.state.redirect) {
+            return <Redirect to="/" />;
+        }
         return (
             <div>
                 <HeaderComponent />
@@ -48,7 +62,8 @@ export default class CreateGuideView extends Component<{}, State> {
                             <label htmlFor="image-input">
                                 <img src={this.state.img} alt="Изображение 3D-модели" />
                             </label>
-                            <input type="file" id="image-input" ref={this.imgInput} onChange={this.handleImgChange} />
+                            <input type="file" id="image-input" name="img" ref={this.imgInput}
+                                   onChange={this.handleImgChange} />
                         </div>
 
                         <div className="form-group">
@@ -62,6 +77,8 @@ export default class CreateGuideView extends Component<{}, State> {
                             <textarea className="form-control" onChange={this.handleDescriptionChange}
                                       placeholder="В данном уроке вы..." />
                         </div>
+
+                        <button className="btn btn-success" onClick={this.handleSubmit}>Создать</button>
                     </form>
                 </div>
             </div>

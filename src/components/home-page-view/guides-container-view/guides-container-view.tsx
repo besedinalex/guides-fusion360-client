@@ -28,11 +28,9 @@ export default class GuidesContainerView extends Component<{}, State> {
                     <div className="container">
                         <div className="row">
                             {this.state.guides.map((guide: Guide, i) => {
-                                return(
-                                    <GuideCardComponent
-                                        imageName={guide.imageName} name={guide.name}
-                                        description={guide.description} id={guide.id} key={i}
-                                    />
+                                return (
+                                    <GuideCardComponent name={guide.name} description={guide.description} id={guide.id}
+                                                        key={i} />
                                 );
                             })}
                         </div>
