@@ -8,7 +8,6 @@ interface State {
     firstName: string;
     lastName: string;
     group: string;
-    inviteCode: string;
     password: string;
     redirect: boolean;
 }
@@ -20,7 +19,6 @@ export default class SignUpAuthView extends Component<{}, State> {
         firstName: '',
         lastName: '',
         group: '',
-        inviteCode: '',
         password: '',
         redirect: false
     };
@@ -32,8 +30,6 @@ export default class SignUpAuthView extends Component<{}, State> {
     handleLastNameChange = (e) => this.setState({lastName: e.target.value});
 
     handleGroupChange = (e) => this.setState({group: e.target.value});
-
-    handleInviteCodeChange = (e) => this.setState({inviteCode: e.target.value});
 
     handlePasswordChange = (e) => this.setState({password: e.target.value});
 
@@ -58,8 +54,6 @@ export default class SignUpAuthView extends Component<{}, State> {
                     <h1 className="h3 mb-3 font-weight-normal">Регистрация</h1>
                     <input onChange={this.handleEmailChange} type="text" className="form-control form-control-top"
                            placeholder="Электронная почта" autoFocus />
-                    <input onChange={this.handleInviteCodeChange} type="text" className="form-control form-control-mid"
-                           placeholder="Код приглашения" />
                     <input onChange={this.handleFirstNameChange} type="text" className="form-control form-control-mid"
                            placeholder="Имя" />
                     <input onChange={this.handleLastNameChange} type="text" className="form-control form-control-mid"
