@@ -39,11 +39,10 @@ export default class SignUpAuthView extends Component<{}, State> {
 
     signUp = (event) => {
         event.preventDefault();
-        postNewUser(this.state.firstName, this.state.lastName, this.state.email,
-            this.state.password, this.state.inviteCode, this.state.group)
+        postNewUser(this.state.firstName, this.state.lastName, this.state.email, this.state.password, this.state.group)
             .then(() => this.setState({redirect: true}))
             .catch(() => alert('Регистрация не удалась.'));
-    }
+    };
 
     render() {
         if (this.state.redirect) {
