@@ -39,9 +39,19 @@ export default class CreateGuideView extends Component<{}, State> {
 
     handleSubmit = (event) => {
         event.preventDefault();
-        postNewGuide(this.state.name, this.state.description, this.imgInput.current.files[0])
-            .then(() => this.setState({redirect: true}))
-            .catch(() => alert('Не удалось создать гайд.'));
+        if (this.imgInput.current === null) {
+            alert('Необходимо выбрать изображение PNG.');
+        } else if (this.imgInput.current.files[0].type !== 'image/png') {
+            alert('Изображение должно быть в формате PNG.');
+        } else if (this.state.name === '') {
+            alert('Необходимо указать имя гайда.');
+        } else if (this.state.description === '') {
+            alert('Необходимо дать описание гайду.');
+        } else {
+            postNewGuide(this.state.name, this.state.description, this.imgInput.current.files[0])
+                .then(() => this.setState({redirect: true}))
+                .catch(() => alert('Не удалось создать гайд.'));
+        }
     };
 
     render() {
@@ -57,7 +67,7 @@ export default class CreateGuideView extends Component<{}, State> {
 
                     <form className="form">
                         <div className="form-group image-upload">
-                            <label>Изображение</label>
+                            <label>Изображение (PNG)</label>
                             <br />
                             <label htmlFor="image-input">
                                 <img src={this.state.img} alt="Изображение 3D-модели" />
