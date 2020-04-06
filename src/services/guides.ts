@@ -34,7 +34,7 @@ export function postNewGuide(name: string, description: string, img: any) {
 
         axios({
             method: 'post',
-            url: `${serverURL}/guides/new?token=${token}`,
+            url: `${serverURL}/guides/guide?token=${token}`,
             data: bodyFormData
         }).then(resolve).catch(reject);
     });
