@@ -39,7 +39,7 @@ export default class CreateGuideView extends Component<{}, State> {
 
     handleSubmit = (event) => {
         event.preventDefault();
-        if (this.imgInput.current === null) {
+        if (this.imgInput.current.files.length === 0) {
             alert('Необходимо выбрать изображение PNG.');
         } else if (this.imgInput.current.files[0].type !== 'image/png') {
             alert('Изображение должно быть в формате PNG.');
