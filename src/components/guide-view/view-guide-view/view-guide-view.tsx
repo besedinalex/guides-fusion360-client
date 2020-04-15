@@ -67,9 +67,10 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
             case 'archive':
                 return (
                     <div className="modal-body" id="modal-body">
+                        <p>Для данной сборки вам понадобятся уже заготовленные нами модели.</p>
                         <a href={`${guideStorage}/${this.state.currentGuideContent}`}
                            download={this.state.currentGuideContent}>
-                            Готовые детали
+                            Кликните, чтобы скачать готовые модели.
                         </a>
                         <br />
                     </div>
@@ -120,7 +121,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                          className={this.state.currentGuideType === 'pdf' ? 'modal-dialog modal-xl h-90' : 'modal-dialog modal-xl'}>
                         <div className="modal-content h-100">
                             <div className="modal-header">
-                                <h5 className="modal-title" id="modal-title">{this.state.currentGuideName} Test</h5>
+                                <h5 className="modal-title" id="modal-title">{this.state.currentGuideName}</h5>
                             </div>
                             {this.modalWindowContent()} {/*Modal body*/}
                             <div className="modal-footer">
