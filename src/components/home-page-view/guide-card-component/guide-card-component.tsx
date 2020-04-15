@@ -14,8 +14,15 @@ export default class GuideCardComponent extends Component<Guide> {
                     <div className="card-body d-flex flex-column">
                         <h5 className="card-title">{this.props.name}</h5>
                         <p className="card-text">{this.props.description}</p>
-                        <Link to={`/guide/${this.props.id}`}
-                              className="btn btn-success mt-auto guide-start">Приступить</Link>
+                        <div className="mt-auto">
+                            <Link to={`/guide/${this.props.id}`} className="btn btn-success guide-start-btn">
+                                Приступить
+                            </Link>
+                            <Link to={`/edit/${this.props.id}`} className="btn btn-warning text-white">
+                                Редактировать
+                            </Link>
+                        </div>
+
                     </div>
                 </div>
             </div>
