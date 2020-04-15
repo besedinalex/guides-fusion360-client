@@ -11,13 +11,6 @@ export function getAllGuides(): Promise<Array<Guide>> {
     });
 }
 
-export function getGuideImageName(guideId: number): Promise<string> {
-    return new Promise((resolve, reject) => {
-        axios.get(`${serverURL}/guides/img?guideId=${guideId}`)
-            .then(data => resolve(data.data)).catch(reject);
-    });
-}
-
 export function getPartGuides(guideId: number): Promise<Array<PartGuide>> {
     return new Promise((resolve, reject) => {
         axios.get(`${serverURL}/guides/parts?guideId=${guideId}`)
@@ -35,6 +28,22 @@ export function postNewGuide(name: string, description: string, img: any) {
         axios({
             method: 'post',
             url: `${serverURL}/guides/guide?token=${token}`,
+            data: bodyFormData
+        }).then(resolve).catch(reject);
+    });
+}
+
+export function postNewPartGuide(guideId: number, name: string, file: any, sortKey: number) {
+    return new Promise((resolve, reject) => {
+        const bodyFormData = new FormData();
+        bodyFormData.append('guideId', String(guideId));
+        bodyFormData.append('name', name);
+        bodyFormData.append('file', file);
+        bodyFormData.append('sortKey', String(sortKey));
+
+        axios({
+            method: 'post',
+            url: `${serverURL}/guides/part-guide?token=${token}`,
             data: bodyFormData
         }).then(resolve).catch(reject);
     });
