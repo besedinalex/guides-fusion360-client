@@ -21,9 +21,6 @@ export default class HeaderComponent extends Component {
                             <Link to="/create" className="nav-link">Создать</Link>
                         </li>
                     </ul>
-                    <Link to="/signup" hidden={isAuthenticated}>
-                        <button className="btn btn-primary margin-right">Регистрация</button>
-                    </Link>
                     <Link to="/login" hidden={isAuthenticated}>
                         <button className="btn btn-light">Войти</button>
                     </Link>
