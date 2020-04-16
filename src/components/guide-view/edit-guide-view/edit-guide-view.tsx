@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import Glyphicon from '@strongdm/glyphicon';
 import HeaderComponent from "../../header-component/header-component";
 import {serverURL} from "../../../services/server-address";
-import {getPartGuides, postNewPartGuide} from "../../../services/guides";
+import {getPartGuides, postNewPartGuide, putPartGuide, putPartGuidesSortKey} from "../../../services/guides";
 import PartGuide from "../../../interfaces/part-guide";
 import {RouteComponentProps} from "react-router-dom";
 
@@ -49,7 +49,29 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
 
     handleVideoChange = event => this.setState({changedGuideVideoLink: event.target.value});
 
-    handleFileChange = () => this.setState({changedFileName: this.fileInput.current.files[0].name})
+    handleFileChange = () => this.setState({changedFileName: this.fileInput.current.files[0].name});
+
+    handleUpButton = index => {
+        const guide1 = this.state.guides[index];
+        const guide2 = this.state.guides[index - 1];
+        putPartGuidesSortKey(guide1.id, guide2.id, guide2.sortKey, guide1.sortKey)
+            .then(() => window.location.reload())
+            .catch(() => {
+                alert('Не удалось поменять гайды местами');
+                window.location.reload();
+            })
+    }
+
+    handleDownButton = index => {
+        const guide1 = this.state.guides[index];
+        const guide2 = this.state.guides[index + 1];
+        putPartGuidesSortKey(guide1.id, guide2.id, guide2.sortKey, guide1.sortKey)
+            .then(() => window.location.reload())
+            .catch(() => {
+                alert('Не удалось поменять гайды местами');
+                window.location.reload();
+            })
+    }
 
     handleSubmit = () => {
         // Poor validation
@@ -62,7 +84,6 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         } else {
             if (this.fileInput.current.files.length > 0) { // File chosen
                 const fileType = this.fileInput.current.files[0].type;
-                console.log(fileType);
                 if (fileType === 'application/pdf') { // Format check
                 } else if (fileType === 'application/zip' || fileType === 'application/x-zip-compressed') {
                 } else {
@@ -78,12 +99,21 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         }
 
         const content = this.state.changedGuideVideoLink === '' ? this.fileInput.current.files[0] : this.state.changedGuideVideoLink;
-        postNewPartGuide(this.state.guideId, this.state.changedGuideName, content, this.state.guides.length)
-            .then(() => window.location.reload())
-            .catch(() => {
-                alert('Не удалось загрузить гайд. Возможно файл с таким именен уже существует.');
-                window.location.reload();
-            });
+        if (this.state.currentGuideId === 0) {
+            postNewPartGuide(this.state.guideId, this.state.changedGuideName, content, this.state.guides.length)
+                .then(() => window.location.reload())
+                .catch(() => {
+                    alert('Не удалось загрузить гайд. Возможно файл с таким именен уже существует.');
+                    window.location.reload();
+                });
+        } else {
+            putPartGuide(this.state.currentGuideId, this.state.changedGuideName, content, this.state.currentGuideId)
+                .then(() => window.location.reload())
+                .catch(() => {
+                    alert('Не удалось обновить гайд.');
+                    window.location.reload();
+                })
+        }
     };
 
     fillModalWindow = (guide?) => {
@@ -127,10 +157,13 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                                     <span className="float-left">
                                         {guide.name}
                                     </span>
-                                    <button className="float-right badge badge-white">
+                                    <button className="float-right badge badge-white"
+                                            disabled={i === this.state.guides.length - 1}
+                                            onClick={() => this.handleDownButton(i)}>
                                         <Glyphicon glyph="chevron-down" />
                                     </button>
-                                    <button className="float-right badge badge-white">
+                                    <button className="float-right badge badge-white" disabled={i === 0}
+                                            onClick={() => this.handleUpButton(i)}>
                                         <Glyphicon glyph="chevron-up" />
                                     </button>
                                 </div>
