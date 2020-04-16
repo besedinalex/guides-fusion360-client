@@ -62,8 +62,9 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         } else {
             if (this.fileInput.current.files.length > 0) { // File chosen
                 const fileType = this.fileInput.current.files[0].type;
+                console.log(fileType);
                 if (fileType === 'application/pdf') { // Format check
-                } else if (fileType === 'application/zip') {
+                } else if (fileType === 'application/zip' || fileType === 'application/x-zip-compressed') {
                 } else {
                     alert('Необходимо загрузить PDF или ZIP файл.');
                     return;
@@ -79,7 +80,10 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         const content = this.state.changedGuideVideoLink === '' ? this.fileInput.current.files[0] : this.state.changedGuideVideoLink;
         postNewPartGuide(this.state.guideId, this.state.changedGuideName, content, this.state.guides.length)
             .then(() => window.location.reload())
-            .catch((e) => console.log(e));
+            .catch(() => {
+                alert('Не удалось загрузить гайд. Возможно файл с таким именен уже существует.');
+                window.location.reload();
+            });
     };
 
     fillModalWindow = (guide?) => {
@@ -93,9 +97,9 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
             });
         } else {
             if (/https?:\/\/(www\.)?(\w+\.)+(\w+)(\/(\w+|\?*|=*|\.)+)*/gi.test(guide.content)) { // YouTube Video
-                this.setState({changedGuideVideoLink: guide.content});
+                this.setState({changedGuideVideoLink: guide.content, changedFileName: ''});
             } else {
-                this.setState({changedFileName: guide.content});
+                this.setState({changedFileName: guide.content, changedGuideVideoLink: ''});
             }
             this.setState({
                 currentGuideId: guide.id,
@@ -146,7 +150,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title" id="modal-title">{this.state.currentGuideName}</h5>
-                                <button className="btn-sm btn-danger" data-dismiss="modal">X</button>
+                                <button className="btn-sm btn btn-danger" data-dismiss="modal">X</button>
                             </div>
                             <div className="modal-body guide-modal px-3" id="modal-body">
 
