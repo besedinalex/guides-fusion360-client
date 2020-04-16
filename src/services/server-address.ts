@@ -1,2 +1,2 @@
 // TODO: Update before prod
-export const serverURL = 'http://127.0.0.1:4004';
+export const serverURL = `http://${window.location.hostname}:4004`;
