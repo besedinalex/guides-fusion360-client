@@ -3,6 +3,7 @@ import {Link} from "react-router-dom";
 import Guide from "../../../interfaces/guide";
 import {serverURL} from "../../../services/server-address";
 import './guide-card-component.sass'
+import {isAuthenticated} from "../../../services/user-data";
 
 export default class GuideCardComponent extends Component<Guide> {
     render() {
@@ -18,7 +19,7 @@ export default class GuideCardComponent extends Component<Guide> {
                             <Link to={`/guide/${this.props.id}`} className="btn btn-success guide-start-btn">
                                 Приступить
                             </Link>
-                            <Link to={`/edit/${this.props.id}`} className="btn btn-warning text-white">
+                            <Link to={`/edit/${this.props.id}`} className="btn btn-warning text-white" hidden={!isAuthenticated}>
                                 Редактировать
                             </Link>
                         </div>
