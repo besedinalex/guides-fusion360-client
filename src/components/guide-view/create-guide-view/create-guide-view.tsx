@@ -1,8 +1,8 @@
 import React, {Component} from "react";
 import HeaderComponent from "../../header-component/header-component";
-import './create-guide-view.sass';
-import {postNewGuide} from "../../../services/guides";
+import {postNewGuide} from "../../../api/guides";
 import {Redirect} from "react-router-dom";
+import './create-guide-view.sass';
 
 interface State {
     name: string;
@@ -50,7 +50,7 @@ export default class CreateGuideView extends Component<{}, State> {
         } else {
             postNewGuide(this.state.name, this.state.description, this.imgInput.current.files[0])
                 .then(() => this.setState({redirect: true}))
-                .catch(() => alert('Не удалось создать гайд.'));
+                .catch(message => alert(message));
         }
     };
 

@@ -3,7 +3,7 @@ import HeaderComponent from "../../header-component/header-component";
 import FooterComponent from "../../footer-component/footer-component";
 import GuideCardComponent from "../guide-card-component/guide-card-component";
 import Guide from "../../../interfaces/guide";
-import {getAllGuides} from "../../../services/guides";
+import {getAllGuides} from "../../../api/guides";
 
 interface State {
     guides: Array<Guide>;

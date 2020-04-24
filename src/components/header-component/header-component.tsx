@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import {Link} from "react-router-dom";
 import './header-component.sass';
-import {signOut, isAuthenticated} from "../../services/user-data";
+import {signOut, isAuthenticated} from "../../api/user-data";
 
 export default class HeaderComponent extends Component {
 

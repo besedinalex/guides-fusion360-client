@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {Link, Redirect} from "react-router-dom";
-import {getToken} from "../../../services/user-data";
+import {getToken} from "../../../api/user-data";
 import '../auth-view.sass';
 
 interface State {

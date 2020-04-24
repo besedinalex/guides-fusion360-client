@@ -6,9 +6,9 @@ import {TrackballControls} from 'three/examples/jsm/controls/TrackballControls';
 import {MTLLoader} from 'three/examples/jsm/loaders/MTLLoader';
 import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader';
 import './model-viewer-view.sass';
-import {serverURL} from "../../services/server-address";
+import {serverURL} from "../../api/server-address";
 import ModelAnnotation from "../../interfaces/model-annotation";
-import {getModelAnnotations} from "../../services/model-annotations";
+import {getModelAnnotations} from "../../api/model-annotations";
 
 interface State {
     modelId: number;

@@ -1,9 +1,9 @@
 import React, {Component} from "react";
 import {Link} from "react-router-dom";
 import Guide from "../../../interfaces/guide";
-import {serverURL} from "../../../services/server-address";
+import {serverURL} from "../../../api/server-address";
 import './guide-card-component.sass'
-import {isAuthenticated} from "../../../services/user-data";
+import {isAuthenticated} from "../../../api/user-data";
 
 export default class GuideCardComponent extends Component<Guide> {
     render() {

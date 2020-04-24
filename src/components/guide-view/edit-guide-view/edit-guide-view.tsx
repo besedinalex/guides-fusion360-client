@@ -1,8 +1,8 @@
 import React, {Component} from "react";
 import Glyphicon from '@strongdm/glyphicon';
 import HeaderComponent from "../../header-component/header-component";
-import {serverURL} from "../../../services/server-address";
-import {getPartGuides, postNewPartGuide, putPartGuide, putPartGuidesSortKey} from "../../../services/guides";
+import {serverURL} from "../../../api/server-address";
+import {getPartGuides, postNewPartGuide, putPartGuide, putPartGuidesSortKey} from "../../../api/guides";
 import PartGuide from "../../../interfaces/part-guide";
 import {RouteComponentProps} from "react-router-dom";
 
@@ -35,13 +35,15 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         // @ts-ignore
         const guideId = this.props.match.params.id;
         this.setState({guideId: guideId});
-        getPartGuides(guideId).then(guides => {
-            if (guides.length === 0) {
-                this.setState({redirect: true});
-            } else {
-                this.setState({guides: guides});
-            }
-        });
+        getPartGuides(guideId)
+            .then(guides => {
+                if (guides.length === 0) {
+                    this.setState({redirect: true});
+                } else {
+                    this.setState({guides: guides});
+                }
+            })
+            .catch(message => alert(message));
         this.fileInput = React.createRef();
     }
 
@@ -54,23 +56,19 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
     handleUpButton = index => {
         const guide1 = this.state.guides[index];
         const guide2 = this.state.guides[index - 1];
-        putPartGuidesSortKey(guide1.id, guide2.id, guide2.sortKey, guide1.sortKey)
-            .then(() => window.location.reload())
-            .catch(() => {
-                alert('Не удалось поменять гайды местами');
-                window.location.reload();
-            })
+        this.handleGuidesSwitch(guide1.id, guide2.id);
     }
 
     handleDownButton = index => {
         const guide1 = this.state.guides[index];
         const guide2 = this.state.guides[index + 1];
-        putPartGuidesSortKey(guide1.id, guide2.id, guide2.sortKey, guide1.sortKey)
-            .then(() => window.location.reload())
-            .catch(() => {
-                alert('Не удалось поменять гайды местами');
-                window.location.reload();
-            })
+        this.handleGuidesSwitch(guide1.id, guide2.id);
+    }
+
+    handleGuidesSwitch = (id1, id2) => {
+        putPartGuidesSortKey(id1, id2)
+            .catch(message => alert(message))
+            .finally(() => window.location.reload());
     }
 
     handleSubmit = () => {
@@ -101,18 +99,12 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         const content = this.state.changedGuideVideoLink === '' ? this.fileInput.current.files[0] : this.state.changedGuideVideoLink;
         if (this.state.currentGuideId === 0) {
             postNewPartGuide(this.state.guideId, this.state.changedGuideName, content, this.state.guides.length)
-                .then(() => window.location.reload())
-                .catch(() => {
-                    alert('Не удалось загрузить гайд. Возможно файл с таким именен уже существует.');
-                    window.location.reload();
-                });
+                .catch(message => alert(message))
+                .finally(() => window.location.reload());
         } else {
             putPartGuide(this.state.currentGuideId, this.state.changedGuideName, content, this.state.currentGuideId)
-                .then(() => window.location.reload())
-                .catch(() => {
-                    alert('Не удалось обновить гайд.');
-                    window.location.reload();
-                })
+                .catch(message => alert(message))
+                .finally(() => window.location.reload());
         }
     };
 

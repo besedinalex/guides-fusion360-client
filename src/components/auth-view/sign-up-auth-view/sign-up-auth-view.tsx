@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import {Link, Redirect} from "react-router-dom";
 import '../auth-view.sass';
-import {postNewUser} from "../../../services/user-data";
+import {postNewUser} from "../../../api/user-data";
 
 interface State {
     email: string;

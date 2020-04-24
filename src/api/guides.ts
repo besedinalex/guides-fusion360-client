@@ -14,7 +14,7 @@ export function getAllGuides(): Promise<Array<Guide>> {
 export function getPartGuides(guideId: number): Promise<Array<PartGuide>> {
     return new Promise((resolve, reject) => {
         axios.get(`${serverURL}/guides/parts?guideId=${guideId}`)
-            .then(data => resolve(data.data)).catch(reject);
+            .then(data => resolve(data.data)).catch(err => reject(err.response.data.message));
     });
 }
 
@@ -29,7 +29,7 @@ export function postNewGuide(name: string, description: string, img: any) {
             method: 'post',
             url: `${serverURL}/guides/guide?token=${token}`,
             data: bodyFormData
-        }).then(resolve).catch(reject);
+        }).then(resolve).catch(err => reject(err.response.data.message));
     });
 }
 
@@ -45,7 +45,7 @@ export function postNewPartGuide(guideId: number, name: string, file: any, sortK
             method: 'post',
             url: `${serverURL}/guides/part-guide?token=${token}`,
             data: bodyFormData
-        }).then(resolve).catch(reject);
+        }).then(resolve).catch(err => reject(err.response.data.message));
     });
 }
 
@@ -60,13 +60,13 @@ export function putPartGuide(id: number, name: string, file: any, sortKey: numbe
             method: 'put',
             url: `${serverURL}/guides/part-guide?token=${token}`,
             data: bodyFormData
-        }).then(resolve).catch(reject);
+        }).then(resolve).catch(err => reject(err.response.data.message));
     });
 }
 
-export function putPartGuidesSortKey(id1: number, id2: number, sortKey1: number, sortKey2: number) {
+export function putPartGuidesSortKey(id1: number, id2: number) {
     return new Promise((resolve, reject) => {
-        axios.put(`${serverURL}/guides/part-guides-sort-key?token=${token}&id1=${id1}&id2=${id2}&sortKey1=${sortKey1}&sortKey2=${sortKey2}`)
-            .then(resolve).catch(reject);
+        axios.put(`${serverURL}/guides/switch?token=${token}&id1=${id1}&id2=${id2}`)
+            .then(resolve).catch(err => reject(err.response.data.message));
     });
 }
