@@ -25,7 +25,7 @@ export default class SignInAuthView extends Component<{}, State> {
         event.preventDefault();
         getToken(this.state.email, this.state.password)
             .then(() => this.setState({redirect: true}))
-            .catch(() => alert("Неверный email или пароль."));
+            .catch(message => alert(message));
     };
 
     render() {
