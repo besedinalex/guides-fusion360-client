@@ -18,7 +18,7 @@ export function getPartGuides(guideId: number): Promise<Array<PartGuide>> {
     });
 }
 
-export function postNewGuide(name: string, description: string, img: any) {
+export function postNewGuide(name: string, description: string, img: File) {
     return new Promise((resolve, reject) => {
         const bodyFormData = new FormData();
         bodyFormData.append('name', name);
@@ -33,7 +33,7 @@ export function postNewGuide(name: string, description: string, img: any) {
     });
 }
 
-export function postNewPartGuide(guideId: number, name: string, file: any, sortKey: number) {
+export function postNewPartGuide(guideId: number, name: string, file: File | string, sortKey: number) {
     return new Promise((resolve, reject) => {
         const bodyFormData = new FormData();
         bodyFormData.append('guideId', String(guideId));
