@@ -49,7 +49,21 @@ export function postNewPartGuide(guideId: number, name: string, file: File | str
     });
 }
 
-export function putPartGuide(id: number, name: string, file: any, sortKey: number) {
+export function postModel(guideId: number, file: File) {
+    return new Promise((resolve, reject) => {
+        const bodyFormData = new FormData();
+        bodyFormData.append('guideId', String(guideId));
+        bodyFormData.append('file', file)
+
+        axios({
+            method: 'post',
+            url: `${serverURL}/guides/model?token=${token}`,
+            data: bodyFormData
+        }).then(resolve).catch(err => reject(err.response.data.message));
+    });
+}
+
+export function putPartGuide(id: number, name: string, file: any) {
     return new Promise((resolve, reject) => {
         const bodyFormData = new FormData();
         bodyFormData.append('id', String(id));

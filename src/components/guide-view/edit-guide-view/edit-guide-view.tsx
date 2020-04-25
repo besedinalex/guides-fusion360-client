@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import Glyphicon from '@strongdm/glyphicon';
 import HeaderComponent from "../../header-component/header-component";
 import {serverURL} from "../../../api/server-address";
-import {getPartGuides, postNewPartGuide, putPartGuide, putPartGuidesSortKey} from "../../../api/guides";
+import {getPartGuides, postModel, postNewPartGuide, putPartGuide, putPartGuidesSortKey} from "../../../api/guides";
 import PartGuide from "../../../interfaces/part-guide";
 import {RouteComponentProps} from "react-router-dom";
 
@@ -10,6 +10,7 @@ interface State {
     redirect: boolean,
     guideId: number,
     guides: Array<PartGuide>;
+    currentMode: string;
     currentGuideId: number;
     currentGuideName: string;
     changedGuideName: string;
@@ -24,6 +25,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         redirect: false,
         guideId: 0,
         guides: [],
+        currentMode: 'guide',
         currentGuideId: 0,
         currentGuideName: '',
         changedGuideName: '',
@@ -73,42 +75,56 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
 
     handleSubmit = () => {
         // Poor validation
-        if (this.state.changedGuideName === '') { // Name check
-            alert('Необходимо ввести название гайда.');
-            return;
-        } else if (this.fileInput.current.files.length === 0 && this.state.changedGuideVideoLink === '') { // Input check
-            alert('Необходимо ввести ссылку на YouTube видео или загрузить PDF или ZIP файл.');
-            return;
-        } else {
-            if (this.fileInput.current.files.length > 0) { // File chosen
-                const fileType = this.fileInput.current.files[0].type;
-                if (fileType === 'application/pdf') { // Format check
-                } else if (fileType === 'application/zip' || fileType === 'application/x-zip-compressed') {
-                } else {
-                    alert('Необходимо загрузить PDF или ZIP файл.');
-                    return;
-                }
-            } else { // Link entered
-                if (!/https?:\/\/(www\.)?(\w+\.)+(\w+)(\/(\w+|\?*|=*|\.)+)*/gi.test(this.state.changedGuideVideoLink)) {
-                    alert('Необходимо ввести корректную ссылку.');
-                    return;
+        if (this.state.currentMode === 'guide') {
+            if (this.state.changedGuideName === '') { // Name check
+                alert('Необходимо ввести название гайда.');
+                return;
+            } else if (this.fileInput.current.files.length === 0 && this.state.changedGuideVideoLink === '') { // Input check
+                alert('Необходимо ввести ссылку на YouTube видео или загрузить PDF или ZIP файл.');
+                return;
+            } else {
+                if (this.fileInput.current.files.length > 0) { // File chosen
+                    const fileType = this.fileInput.current.files[0].type;
+                    if (fileType === 'application/pdf') { // Format check
+                    } else if (fileType === 'application/zip' || fileType === 'application/x-zip-compressed') {
+                    } else {
+                        alert('Необходимо загрузить PDF или ZIP файл.');
+                        return;
+                    }
+                } else { // Link entered
+                    if (!/https?:\/\/(www\.)?(\w+\.)+(\w+)(\/(\w+|\?*|=*|\.)+)*/gi.test(this.state.changedGuideVideoLink)) {
+                        alert('Необходимо ввести корректную ссылку.');
+                        return;
+                    }
                 }
             }
-        }
 
-        const content = this.state.changedGuideVideoLink === '' ? this.fileInput.current.files[0] : this.state.changedGuideVideoLink;
-        if (this.state.currentGuideId === 0) {
-            postNewPartGuide(this.state.guideId, this.state.changedGuideName, content, this.state.guides.length)
-                .catch(message => alert(message))
-                .finally(() => window.location.reload());
-        } else {
-            putPartGuide(this.state.currentGuideId, this.state.changedGuideName, content, this.state.currentGuideId)
-                .catch(message => alert(message))
-                .finally(() => window.location.reload());
+            const content = this.state.changedGuideVideoLink === '' ? this.fileInput.current.files[0] : this.state.changedGuideVideoLink;
+            if (this.state.currentGuideId === 0) {
+                postNewPartGuide(this.state.guideId, this.state.changedGuideName, content, this.state.guides.length)
+                    .catch(message => alert(message))
+                    .finally(() => window.location.reload());
+            } else {
+                putPartGuide(this.state.currentGuideId, this.state.changedGuideName, content)
+                    .catch(message => alert(message))
+                    .finally(() => window.location.reload());
+            }
+        } else { // model
+            if (this.fileInput.current.files.length > 0) { // File chosen
+                alert('Загрузка модели может занять некоторое время. ' +
+                    'Проверяйте результат загрузки путем открытия модели на странице гайда.' +
+                    '\nНажмите ОК, чтобы продолжить.');
+                postModel(this.state.guideId, this.fileInput.current.files[0])
+                    .catch(message => alert(message))
+                    .finally(() => window.location.reload());
+            } else {
+                alert('Необходимо выбрать STP файл для загрузки');
+            }
         }
     };
 
-    fillModalWindow = (guide?) => {
+    fillModalWindow = (mode, guide?) => {
+        this.setState({currentMode: mode});
         if (guide === undefined) {
             this.setState({
                 currentGuideId: 0,
@@ -145,7 +161,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                         {this.state.guides.map((guide, i) => {
                             return (
                                 <div className="list-group-item list-group-item-success" key={i} data-toggle="modal"
-                                     data-target="#modal" onClick={() => this.fillModalWindow(guide)}>
+                                     data-target="#modal" onClick={() => this.fillModalWindow('guide', guide)}>
                                     <span className="float-left">
                                         {guide.name}
                                     </span>
@@ -163,8 +179,13 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                         })}
 
                         <button className="list-group-item list-group-item-danger" data-toggle="modal"
-                                data-target="#modal" onClick={() => this.fillModalWindow()}>
+                                data-target="#modal" onClick={() => this.fillModalWindow('guide')}>
                             Создать гайд
+                        </button>
+
+                        <button className="list-group-item list-group-item-warning" data-toggle="modal"
+                                data-target="#modal" onClick={() => this.fillModalWindow('model')}>
+                            Загрузить модель
                         </button>
                     </div>
                 </div>
@@ -184,6 +205,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                                         <span className="input-group-text">Название</span>
                                     </div>
                                     <input type="text" className="form-control" onChange={this.handleNameChange}
+                                           disabled={this.state.currentMode === 'model'}
                                            placeholder={this.state.changedGuideName} />
                                 </div>
 
@@ -192,7 +214,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                                         <span className="input-group-text">Ссылка на видео</span>
                                     </div>
                                     <input type="text" className="form-control" onChange={this.handleVideoChange}
-                                           disabled={this.state.changedFileName !== ''}
+                                           disabled={this.state.changedFileName !== '' || this.state.currentMode === 'model'}
                                            placeholder={this.state.changedGuideVideoLink} />
                                 </div>
 
