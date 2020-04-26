@@ -21,6 +21,11 @@ export default class HeaderComponent extends Component {
                             <Link to="/create" className="nav-link">Создать</Link>
                         </li>
                     </ul>
+                    <ul className="navbar-nav mr-auto">
+                        <li hidden={!isAuthenticated} className="nav-item">
+                            <Link to="/hidden" className="nav-link">Редактировать</Link>
+                        </li>
+                    </ul>
                     <Link to="/login" hidden={isAuthenticated}>
                         <button className="btn btn-light">Войти</button>
                     </Link>

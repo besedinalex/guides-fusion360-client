@@ -38,13 +38,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         const guideId = this.props.match.params.id;
         this.setState({guideId: guideId});
         getPartGuides(guideId)
-            .then(guides => {
-                if (guides.length === 0) {
-                    this.setState({redirect: true});
-                } else {
-                    this.setState({guides: guides});
-                }
-            })
+            .then(guides => this.setState({guides: guides}))
             .catch(message => alert(message));
         this.fileInput = React.createRef();
     }
