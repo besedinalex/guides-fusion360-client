@@ -2,7 +2,7 @@ import axios from 'axios';
 import {serverURL} from "./server-address";
 import Guide from "../interfaces/guide";
 import PartGuide from "../interfaces/part-guide";
-import {token} from "./user-data";
+import {signOut, token} from "./user-data";
 
 export function getAllGuides(): Promise<Guide[]> {
     return new Promise((resolve, reject) => {
@@ -16,7 +16,12 @@ export function getAllHiddenGuides(): Promise<Guide[]> {
     return new Promise((resolve, reject) => {
         axios.get(`${serverURL}/guides/all-hidden?token=${token}`)
             .then(data => resolve(data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => {
+                if (err.response.status === 401) {
+                    signOut();
+                }
+                reject(err.response.data.message);
+            });
     });
 }
 
@@ -41,7 +46,12 @@ export function postNewGuide(name: string, description: string, img: File) {
             data: bodyFormData
         })
             .then(resolve)
-            .catch(err => reject(err.response.data.message));
+            .catch(err => {
+                if (err.response.status === 401) {
+                    signOut();
+                }
+                reject(err.response.data.message);
+            });
     });
 }
 
@@ -59,7 +69,12 @@ export function postNewPartGuide(guideId: number, name: string, file: File | str
             data: bodyFormData
         })
             .then(resolve)
-            .catch(err => reject(err.response.data.message));
+            .catch(err => {
+                if (err.response.status === 401) {
+                    signOut();
+                }
+                reject(err.response.data.message);
+            });
     });
 }
 
@@ -75,7 +90,12 @@ export function postModel(guideId: number, file: File) {
             data: bodyFormData
         })
             .then(resolve)
-            .catch(err => reject(err.response.data.message));
+            .catch(err => {
+                if (err.response.status === 401) {
+                    signOut();
+                }
+                reject(err.response.data.message);
+            });
     });
 }
 
@@ -83,7 +103,12 @@ export function putHidden(guideId: number, hidden: string) {
     return new Promise((resolve, reject) => {
         axios.put(`${serverURL}/guides/hidden?token=${token}&guideId=${guideId}&hidden=${hidden}`)
             .then(resolve)
-            .catch(err => reject(err.response.data.message));
+            .catch(err => {
+                if (err.response.status === 401) {
+                    signOut();
+                }
+                reject(err.response.data.message);
+            });
     });
 }
 
@@ -100,7 +125,12 @@ export function putPartGuide(id: number, name: string, file: any) {
             data: bodyFormData
         })
             .then(resolve)
-            .catch(err => reject(err.response.data.message));
+            .catch(err => {
+                if (err.response.status === 401) {
+                    signOut();
+                }
+                reject(err.response.data.message);
+            });
     });
 }
 
@@ -108,6 +138,11 @@ export function putPartGuidesSortKey(id1: number, id2: number) {
     return new Promise((resolve, reject) => {
         axios.put(`${serverURL}/guides/switch?token=${token}&id1=${id1}&id2=${id2}`)
             .then(resolve)
-            .catch(err => reject(err.response.data.message));
+            .catch(err => {
+                if (err.response.status === 401) {
+                    signOut();
+                }
+                reject(err.response.data.message);
+            });
     });
 }
