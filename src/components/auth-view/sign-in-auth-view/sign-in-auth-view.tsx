@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {Link, Redirect} from "react-router-dom";
-import {getToken} from "../../../services/user-data";
+import {getToken} from "../../../api/user-data";
 import '../auth-view.sass';
 
 interface State {
@@ -25,7 +25,7 @@ export default class SignInAuthView extends Component<{}, State> {
         event.preventDefault();
         getToken(this.state.email, this.state.password)
             .then(() => this.setState({redirect: true}))
-            .catch(() => alert("Неверный email или пароль."));
+            .catch(message => alert(message));
     };
 
     render() {

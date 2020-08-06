@@ -2,8 +2,8 @@ import React, {Component} from "react";
 import {RouteComponentProps, Redirect, Link} from "react-router-dom";
 import HeaderComponent from "../../header-component/header-component";
 import PartGuide from "../../../interfaces/part-guide";
-import {getPartGuides} from "../../../services/guides";
-import {serverURL} from "../../../services/server-address";
+import {getPartGuides} from "../../../api/guides";
+import {serverURL} from "../../../api/server-address";
 import './view-guide-view.sass';
 
 interface State {
@@ -30,13 +30,15 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
         // @ts-ignore
         const guideId = this.props.match.params.id;
         this.setState({guideId: guideId});
-        getPartGuides(guideId).then(guides => {
-            if (guides.length === 0) {
-                this.setState({redirect: true});
-            } else {
-                this.setState({guides: guides});
-            }
-        });
+        getPartGuides(guideId)
+            .then(guides => {
+                if (guides.length === 0) {
+                    this.setState({redirect: true});
+                } else {
+                    this.setState({guides: guides});
+                }
+            })
+            .catch(message => alert(message));
     }
 
     fillModalWindow(part: PartGuide) {

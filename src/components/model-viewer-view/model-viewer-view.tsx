@@ -2,13 +2,13 @@ import React, {Component} from 'react';
 import {RouteComponentProps} from "react-router";
 import {Link, Redirect} from "react-router-dom";
 import * as THREE from 'three';
-import {TrackballControls} from 'three/examples/jsm/controls/TrackballControls';
-import {MTLLoader} from 'three/examples/jsm/loaders/MTLLoader';
-import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader';
-import './model-viewer-view.sass';
-import {serverURL} from "../../services/server-address";
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import {DRACOLoader} from "three/examples/jsm/loaders/DRACOLoader";
+import {serverURL} from "../../api/server-address";
 import ModelAnnotation from "../../interfaces/model-annotation";
-import {getModelAnnotations} from "../../services/model-annotations";
+import {getModelAnnotations} from "../../api/model-annotations";
+import './model-viewer-view.sass';
 
 interface State {
     modelId: number;
@@ -22,7 +22,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
     private scene: THREE.Scene;
     private renderer: THREE.WebGLRenderer;
     private camera: THREE.PerspectiveCamera;
-    private controls: TrackballControls;
+    private controls: OrbitControls;
     private raycaster: THREE.Raycaster;
     private mouse: THREE.Vector2;
     private animationStopped: boolean;
@@ -43,22 +43,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
 
         this.scene = new THREE.Scene();
 
-        new MTLLoader().load(`${serverURL}/models/${this.state.modelId}/model.mtl`,
-            (materials) => {
-                materials.preload();
-                const objLoader = new OBJLoader();
-                objLoader.setMaterials(materials);
-                objLoader.load(`${serverURL}/models/${this.state.modelId}/model.obj`,
-                    mesh => this.scene.add(mesh),
-                    () => {},
-                    () => this.setState({redirect: true})
-                );
-            },
-            () => {},
-            () => this.setState({redirect: true})
-        );
-
-        const ambient = new THREE.AmbientLight(0xffffff, 1.0);
+        const ambient = new THREE.AmbientLight(0xffffff, 0.4);
         this.scene.add(ambient);
 
         const keyLight = new THREE.DirectionalLight(new THREE.Color('hsl(30, 100%, 75%)'), 1.0);
@@ -82,12 +67,30 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         this.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100000);
         this.camera.position.set(225, 150, 375);
 
-        this.controls = new TrackballControls(this.camera, this.renderer.domElement);
-        this.controls.rotateSpeed = 2;
-        this.controls.zoomSpeed = 2;
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
+
+        const gltfLoader = new GLTFLoader();
+        gltfLoader.setDRACOLoader(new DRACOLoader().setDecoderPath(`https://www.gstatic.com/draco/v1/decoders/`));
+        gltfLoader.load(
+            `${serverURL}/storage/${this.state.modelId}/model.glb`,
+                loadedGLTF => {
+                const modelBoundingBox = new THREE.Box3().setFromObject(loadedGLTF.scene) as any;
+                modelBoundingBox.size = {};
+                modelBoundingBox.size.x = modelBoundingBox.max.x - modelBoundingBox.min.x;
+                modelBoundingBox.size.y = modelBoundingBox.max.y - modelBoundingBox.min.y;
+                modelBoundingBox.size.z = modelBoundingBox.max.z - modelBoundingBox.min.z;
+                const objectSize = Math.max(modelBoundingBox.getSize().y, modelBoundingBox.getSize().x);
+                const offset = objectSize / (2 * Math.tan(this.camera.fov * (Math.PI / 360)));
+                this.camera.position.set(offset, offset, offset);
+                this.controls.target = modelBoundingBox.getCenter();
+                this.scene.add(loadedGLTF.scene);
+            },
+            undefined,
+            () => this.setState({redirect: true})
+        );
 
         window.addEventListener('resize', this.onWindowResize);
 
@@ -190,7 +193,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
 
     render() {
         if (this.state.redirect) {
-            return <Redirect to="/page404" />
+            return <Redirect to={`/guide/${this.state.modelId}`} />
         }
         return (
             <div ref={(host) => this.host = host} onClick={this.getCoordinatesOfClick}>
