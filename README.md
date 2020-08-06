@@ -4,7 +4,7 @@ This small web site was created for very beginners (especially pupils) who have 
 
 Every guide may have different quality and usefulness depending on who exactly made the one.
 
-This site is the new version of an [old project](https://github.com/BesedinAlex/guides-fusion360-old) which was abandoned due to some reasons. It also uses data from server, that is developed in [separate repository](https://github.com/BesedinAlex/guides-fusion360-server).
+This site is the new version of an [old project](https://github.com/BesedinAlex/guides-fusion360-old) which is now deprecated. It also uses data from server, that is developed in [separate repository](https://github.com/BesedinAlex/guides-fusion360-server).
 
 ### Setup
 
