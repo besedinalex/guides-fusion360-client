@@ -1,10 +1,16 @@
 import React, {Component} from "react";
 import Glyphicon from '@strongdm/glyphicon';
 import HeaderComponent from "../../header-component/header-component";
-import {serverURL} from "../../../api/server-address";
-import {getPartGuides, postModel, postNewPartGuide, putPartGuide, putPartGuidesSortKey} from "../../../api/guides";
+import {
+    getGuidePreview,
+    getPartGuides,
+    postModel,
+    postNewPartGuide,
+    putPartGuide,
+    putPartGuidesSortKey
+} from "../../../api/guides";
 import PartGuide from "../../../interfaces/part-guide";
-import {RouteComponentProps} from "react-router-dom";
+import {Redirect, RouteComponentProps} from "react-router-dom";
 
 interface State {
     redirect: boolean,
@@ -16,6 +22,7 @@ interface State {
     changedGuideName: string;
     changedGuideVideoLink: string;
     changedFileName: string;
+    preview: string;
 }
 
 export default class EditGuideView extends Component<RouteComponentProps, State> {
@@ -30,15 +37,19 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         currentGuideName: '',
         changedGuideName: '',
         changedGuideVideoLink: '',
-        changedFileName: ''
+        changedFileName: '',
+        preview: ''
     }
 
     componentDidMount() {
         // @ts-ignore
         const guideId = this.props.match.params.id;
         this.setState({guideId: guideId});
+        getGuidePreview(guideId)
+            .then(data => this.setState({preview: data}))
+            .catch(() => this.setState({redirect: true}));
         getPartGuides(guideId)
-            .then(guides => this.setState({guides: guides}))
+            .then(guides => this.setState({guides: guides.sort((a, b) => a.sortKey - b.sortKey)}))
             .catch(message => alert(message));
         this.fileInput = React.createRef();
     }
@@ -142,12 +153,16 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
     };
 
     render() {
+        if (this.state.redirect) {
+            return <Redirect to="/page404" />
+        }
+
         return (
             <div>
                 <HeaderComponent />
 
                 <div className="container margin-after-header py-4 justify-content-center">
-                    <img src={`${serverURL}/storage/${this.state.guideId}/preview.png`} alt="Preview of the model."
+                    <img src={this.state.preview} alt="Preview of the model."
                          className="mx-auto w-50 h-50 d-block my-4 img-fluid border rounded border" />
 
                     <div className="list-group w-50 m-auto">

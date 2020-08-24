@@ -56,7 +56,7 @@ export default class CreateGuideView extends Component<{}, State> {
 
     render() {
         if (this.state.redirect) {
-            return <Redirect to="/" />;
+            return <Redirect to="/hidden" />;
         }
         return (
             <div>

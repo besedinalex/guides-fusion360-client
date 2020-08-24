@@ -1,20 +1,33 @@
 import React, {Component} from "react";
 import {Link} from "react-router-dom";
 import Guide from "../../../interfaces/guide";
-import {serverURL} from "../../../api/server-address";
 import './guide-card-component.sass'
+import {getGuidePreview} from "../../../api/guides";
 
 interface Hidden {
     hidden: boolean;
 }
 
-export default class GuideCardComponent extends Component<Guide & Hidden> {
+interface State {
+    preview: string;
+}
+
+export default class GuideCardComponent extends Component<Guide & Hidden, State> {
+
+    state = {
+        preview: ''
+    }
+
+    componentDidMount() {
+        getGuidePreview(this.props.id).then(data => this.setState({preview: data}));
+    }
+
     render() {
         return (
             <div className="col-md-4 d-flex align-items-stretch">
                 <div className="card mb-4 box-shadow">
                     <img className="card-img-top border-bottom"
-                         src={`${serverURL}/storage/${this.props.id}/preview.png`} alt="Preview of the model." />
+                         src={this.state.preview} alt="Preview of the model." />
                     <div className="card-body d-flex flex-column">
                         <h5 className="card-title">{this.props.name}</h5>
                         <p className="card-text">{this.props.description}</p>

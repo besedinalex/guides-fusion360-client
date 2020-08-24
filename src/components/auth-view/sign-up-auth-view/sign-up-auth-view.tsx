@@ -7,7 +7,6 @@ interface State {
     email: string;
     firstName: string;
     lastName: string;
-    group: string;
     password: string;
     redirect: boolean;
 }
@@ -18,7 +17,6 @@ export default class SignUpAuthView extends Component<{}, State> {
         email: '',
         firstName: '',
         lastName: '',
-        group: '',
         password: '',
         redirect: false
     };
@@ -29,13 +27,11 @@ export default class SignUpAuthView extends Component<{}, State> {
 
     handleLastNameChange = (e) => this.setState({lastName: e.target.value});
 
-    handleGroupChange = (e) => this.setState({group: e.target.value});
-
     handlePasswordChange = (e) => this.setState({password: e.target.value});
 
     signUp = (event) => {
         event.preventDefault();
-        postNewUser(this.state.firstName, this.state.lastName, this.state.email, this.state.password, this.state.group)
+        postNewUser(this.state.firstName, this.state.lastName, this.state.email, this.state.password)
             .then(() => this.setState({redirect: true}))
             .catch(message => alert(message));
     };
@@ -58,8 +54,6 @@ export default class SignUpAuthView extends Component<{}, State> {
                            placeholder="Имя" />
                     <input onChange={this.handleLastNameChange} type="text" className="form-control form-control-mid"
                            placeholder="Фамилия" />
-                    <input onChange={this.handleGroupChange} type="text" className="form-control form-control-mid"
-                           placeholder="Группа" />
                     <input onChange={this.handlePasswordChange} type="password"
                            className="form-control form-control-bottom" placeholder="Пароль" />
                     <Link to="/login" className="link">Уже есть аккаунт? Войди!</Link>

@@ -1,26 +1,25 @@
 import axios from 'axios';
 import {serverURL} from './server-address';
 
-let session;
 let isAuthenticated;
 let token;
 
 function getToken(email: string, password: string): Promise<any> {
     return new Promise((resolve, reject) => {
-        axios.get(`${serverURL}/user/token?email=${email}&password=${password}`)
+        axios.get(`${serverURL}/users/token`, {params: {email, password}})
             .then(res => {
-                handleAuthentication(res.data);
+                handleAuthentication(res.data.data);
                 resolve();
             })
             .catch(err => reject(err.response.data.message));
     });
 }
 
-function postNewUser(firstName: string, lastName: string, email: string, password: string, group: string): Promise<any> {
+function postNewUser(firstName: string, lastName: string, email: string, password: string): Promise<any> {
     return new Promise((resolve, reject) => {
-        axios.post(`${serverURL}/user/new?firstName=${firstName}&lastName=${lastName}&email=${email}&password=${password}&group=${group}`)
+        axios.post(`${serverURL}/users/new`, {email, firstName, lastName, password})
             .then(res => {
-                handleAuthentication(res.data);
+                handleAuthentication(res.data.data);
                 resolve();
             })
             .catch(err => reject(err.response.data.message));
@@ -28,19 +27,21 @@ function postNewUser(firstName: string, lastName: string, email: string, passwor
 }
 
 function signOut() {
-    localStorage.removeItem('session');
+    localStorage.removeItem('token');
     window.location.reload();
 }
 
 function handleAuthentication(session) {
-    localStorage.setItem('session', JSON.stringify(session));
+    localStorage.setItem('token', session);
     updateAuthData();
 }
 
 function updateAuthData() {
-    session = JSON.parse(localStorage.getItem('session'));
-    isAuthenticated = session !== null;
-    token = session !== null ? session['token'] : undefined;
+    token = localStorage.getItem('token');
+    isAuthenticated = token !== null;
+    if (isAuthenticated) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
 }
 
 updateAuthData();

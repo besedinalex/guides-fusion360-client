@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import {RouteComponentProps, Redirect, Link} from "react-router-dom";
 import HeaderComponent from "../../header-component/header-component";
 import PartGuide from "../../../interfaces/part-guide";
-import {getPartGuides} from "../../../api/guides";
+import {getGuidePreview, getPartGuides} from "../../../api/guides";
 import {serverURL} from "../../../api/server-address";
 import './view-guide-view.sass';
 
@@ -13,6 +13,7 @@ interface State {
     currentGuideName: string;
     currentGuideContent: string;
     currentGuideType: string;
+    preview: string;
 }
 
 export default class ViewGuideView extends Component<RouteComponentProps, State> {
@@ -23,21 +24,20 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
         guides: [],
         currentGuideName: '',
         currentGuideContent: '',
-        currentGuideType: ''
+        currentGuideType: '',
+        preview: ''
     };
 
     componentDidMount() {
         // @ts-ignore
         const guideId = this.props.match.params.id;
         this.setState({guideId: guideId});
+        getGuidePreview(guideId)
+            .then(data => this.setState({preview: data}))
+            .catch(() => this.setState({redirect: true}));
         getPartGuides(guideId)
-            .then(guides => {
-                if (guides.length === 0) {
-                    this.setState({redirect: true});
-                } else {
-                    this.setState({guides: guides});
-                }
-            })
+            .then(guides =>
+                this.setState({guides: guides.sort(((a, b) => a.sortKey - b.sortKey))}))
             .catch(message => alert(message));
     }
 
@@ -96,7 +96,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                 <HeaderComponent />
 
                 <div className="container margin-after-header py-4">
-                    <img src={`${serverURL}/storage/${this.state.guideId}/preview.png`}
+                    <img src={this.state.preview}
                          className="mx-auto w-50 h-50 d-block my-4 img-fluid border rounded border"
                          alt="Preview of the model." />
                     <ul className="nav justify-content-center">

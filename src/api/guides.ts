@@ -2,79 +2,85 @@ import axios from 'axios';
 import {serverURL} from "./server-address";
 import Guide from "../interfaces/guide";
 import PartGuide from "../interfaces/part-guide";
-import {signOut, token} from "./user-data";
+import {signOut} from "./user-data";
 
 export function getAllGuides(): Promise<Guide[]> {
     return new Promise((resolve, reject) => {
         axios.get(`${serverURL}/guides/all`)
-            .then(data => resolve(data.data))
+            .then(res => resolve(res.data.data))
             .catch(err => reject(err.response.data.message));
     });
 }
 
 export function getAllHiddenGuides(): Promise<Guide[]> {
     return new Promise((resolve, reject) => {
-        axios.get(`${serverURL}/guides/all-hidden?token=${token}`)
-            .then(data => resolve(data.data))
+        axios.get(`${serverURL}/guides/all-hidden`)
+            .then(res => resolve(res.data.data))
             .catch(err => {
-                if (err.response.status === 401) {
+                if (err.response.status === 401 && err.response.data === '') {
                     signOut();
+                } else {
+                    reject(err.response.data.message);
                 }
-                reject(err.response.data.message);
+            });
+    });
+}
+
+export function getGuidePreview(guideId: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+        axios.get(`${serverURL}/guides/preview/${guideId}`, {responseType: 'arraybuffer'})
+            .then(res => {
+                const base64 = btoa(new Uint8Array(res.data)
+                        .reduce((data, byte) => data + String.fromCharCode(byte), '',)
+                );
+                resolve('data:;base64,' + base64);
+            })
+            .catch(err => {
+                if (err.response.status === 400 || err.response.status === 401) {
+                    signOut();
+                } else {
+                    reject(err.response.data.message);
+                }
             });
     });
 }
 
 export function getPartGuides(guideId: number): Promise<PartGuide[]> {
     return new Promise((resolve, reject) => {
-        axios.get(`${serverURL}/guides/parts?guideId=${guideId}`)
-            .then(data => resolve(data.data))
+        axios.get(`${serverURL}/guides/parts/${guideId}`)
+            .then(res => resolve(res.data.data))
             .catch(err => reject(err.response.data.message));
     });
 }
 
-export function postNewGuide(name: string, description: string, img: File) {
+export function postNewGuide(name: string, description: string, image: File) {
     return new Promise((resolve, reject) => {
         const bodyFormData = new FormData();
         bodyFormData.append('name', name);
         bodyFormData.append('description', description);
-        bodyFormData.append('img', img);
+        bodyFormData.append('image', image);
 
-        axios({
-            method: 'post',
-            url: `${serverURL}/guides/guide?token=${token}`,
-            data: bodyFormData
-        })
+        axios.post(`${serverURL}/guides/guide`, bodyFormData)
             .then(resolve)
-            .catch(err => {
-                if (err.response.status === 401) {
-                    signOut();
-                }
-                reject(err.response.data.message);
-            });
+            .catch(err => reject(err.response.data.message));
     });
 }
 
-export function postNewPartGuide(guideId: number, name: string, file: File | string, sortKey: number) {
+export function postNewPartGuide(guideId: number, name: string, data: File | string, sortKey: number) {
     return new Promise((resolve, reject) => {
         const bodyFormData = new FormData();
         bodyFormData.append('guideId', String(guideId));
         bodyFormData.append('name', name);
-        bodyFormData.append('file', file);
         bodyFormData.append('sortKey', String(sortKey));
+        if (typeof data === "string") {
+            bodyFormData.append('content', data);
+        } else {
+            bodyFormData.append('file', data);
+        }
 
-        axios({
-            method: 'post',
-            url: `${serverURL}/guides/part-guide?token=${token}`,
-            data: bodyFormData
-        })
+        axios.post(`${serverURL}/guides/part-guide`, bodyFormData)
             .then(resolve)
-            .catch(err => {
-                if (err.response.status === 401) {
-                    signOut();
-                }
-                reject(err.response.data.message);
-            });
+            .catch(err => reject(err.response.data.message));
     });
 }
 
@@ -84,65 +90,32 @@ export function postModel(guideId: number, file: File) {
         bodyFormData.append('guideId', String(guideId));
         bodyFormData.append('file', file)
 
-        axios({
-            method: 'post',
-            url: `${serverURL}/guides/model?token=${token}`,
-            data: bodyFormData
-        })
+        axios.post(`${serverURL}/guides/model`, bodyFormData)
             .then(resolve)
-            .catch(err => {
-                if (err.response.status === 401) {
-                    signOut();
-                }
-                reject(err.response.data.message);
-            });
+            .catch(err => reject(err.response.data.message));
     });
 }
 
-export function putHidden(guideId: number, hidden: string) {
-    return new Promise((resolve, reject) => {
-        axios.put(`${serverURL}/guides/hidden?token=${token}&guideId=${guideId}&hidden=${hidden}`)
-            .then(resolve)
-            .catch(err => {
-                if (err.response.status === 401) {
-                    signOut();
-                }
-                reject(err.response.data.message);
-            });
-    });
-}
-
-export function putPartGuide(id: number, name: string, file: any) {
+export function putPartGuide(id: number, name: string, content: string | File) {
     return new Promise((resolve, reject) => {
         const bodyFormData = new FormData();
-        bodyFormData.append('id', String(id));
         bodyFormData.append('name', name);
-        bodyFormData.append('file', file);
+        if (typeof content === "string") {
+            bodyFormData.append('content', content);
+        } else {
+            bodyFormData.append('file', content);
+        }
 
-        axios({
-            method: 'put',
-            url: `${serverURL}/guides/part-guide?token=${token}`,
-            data: bodyFormData
-        })
+        axios.put(`${serverURL}/guides/part-guide/${id}`, bodyFormData)
             .then(resolve)
-            .catch(err => {
-                if (err.response.status === 401) {
-                    signOut();
-                }
-                reject(err.response.data.message);
-            });
+            .catch(err => reject(err.response.data.message));
     });
 }
 
 export function putPartGuidesSortKey(id1: number, id2: number) {
     return new Promise((resolve, reject) => {
-        axios.put(`${serverURL}/guides/switch?token=${token}&id1=${id1}&id2=${id2}`)
+        axios.put(`${serverURL}/guides/switch`, null , {params: {partGuideId1: id1, partGuideId2: id2}})
             .then(resolve)
-            .catch(err => {
-                if (err.response.status === 401) {
-                    signOut();
-                }
-                reject(err.response.data.message);
-            });
+            .catch(err => reject(err.response.data.message));
     });
 }
