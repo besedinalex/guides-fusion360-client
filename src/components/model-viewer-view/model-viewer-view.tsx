@@ -5,10 +5,10 @@ import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {DRACOLoader} from "three/examples/jsm/loaders/DRACOLoader";
-import {serverURL} from "../../api/server-address";
 import ModelAnnotation from "../../interfaces/model-annotation";
 import {getModelAnnotations} from "../../api/model-annotations";
 import './model-viewer-view.sass';
+import {getGuideFile} from "../../api/guides";
 
 interface State {
     modelId: number;
@@ -38,7 +38,16 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         };
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+        let model;
+        try {
+            model = await getGuideFile(this.state.modelId, 'model.glb');
+        } catch (e) {
+            alert(e);
+            this.setState({redirect: true});
+            return;
+        }
+
         this.animationStopped = false;
 
         this.scene = new THREE.Scene();
@@ -74,23 +83,18 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
 
         const gltfLoader = new GLTFLoader();
         gltfLoader.setDRACOLoader(new DRACOLoader().setDecoderPath(`https://www.gstatic.com/draco/v1/decoders/`));
-        gltfLoader.load(
-            `${serverURL}/storage/${this.state.modelId}/model.glb`,
-                loadedGLTF => {
-                const modelBoundingBox = new THREE.Box3().setFromObject(loadedGLTF.scene) as any;
-                modelBoundingBox.size = {};
-                modelBoundingBox.size.x = modelBoundingBox.max.x - modelBoundingBox.min.x;
-                modelBoundingBox.size.y = modelBoundingBox.max.y - modelBoundingBox.min.y;
-                modelBoundingBox.size.z = modelBoundingBox.max.z - modelBoundingBox.min.z;
-                const objectSize = Math.max(modelBoundingBox.getSize().y, modelBoundingBox.getSize().x);
-                const offset = objectSize / (2 * Math.tan(this.camera.fov * (Math.PI / 360)));
-                this.camera.position.set(offset, offset, offset);
-                this.controls.target = modelBoundingBox.getCenter();
-                this.scene.add(loadedGLTF.scene);
-            },
-            undefined,
-            () => this.setState({redirect: true})
-        );
+        gltfLoader.load(model, loadedGLTF => {
+            const modelBoundingBox = new THREE.Box3().setFromObject(loadedGLTF.scene) as any;
+            modelBoundingBox.size = {};
+            modelBoundingBox.size.x = modelBoundingBox.max.x - modelBoundingBox.min.x;
+            modelBoundingBox.size.y = modelBoundingBox.max.y - modelBoundingBox.min.y;
+            modelBoundingBox.size.z = modelBoundingBox.max.z - modelBoundingBox.min.z;
+            const objectSize = Math.max(modelBoundingBox.getSize().y, modelBoundingBox.getSize().x);
+            const offset = objectSize / (2 * Math.tan(this.camera.fov * (Math.PI / 360)));
+            this.camera.position.set(offset, offset, offset);
+            this.controls.target = modelBoundingBox.getCenter();
+            this.scene.add(loadedGLTF.scene);
+        });
 
         window.addEventListener('resize', this.onWindowResize);
 
@@ -193,8 +197,9 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
 
     render() {
         if (this.state.redirect) {
-            return <Redirect to={`/guide/${this.state.modelId}`} />
+            return <Redirect to={`/guide/${this.state.modelId}`} />;
         }
+
         return (
             <div ref={(host) => this.host = host} onClick={this.getCoordinatesOfClick}>
                 <Link to="/" className="viewer-btn home">
