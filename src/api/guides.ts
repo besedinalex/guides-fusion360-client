@@ -26,14 +26,16 @@ export function getAllHiddenGuides(): Promise<Guide[]> {
     });
 }
 
-export function getGuidePreview(guideId: number): Promise<string> {
+export function getGuideFile(guideId: number, filename: string): Promise<string> {
     return new Promise((resolve, reject) => {
-        axios.get(`${serverURL}/guides/preview/${guideId}`, {responseType: 'arraybuffer'})
+        axios.get(`${serverURL}/guides/file/${guideId}`, {responseType: 'arraybuffer', params: {filename}})
             .then(res => {
                 const base64 = btoa(new Uint8Array(res.data)
                         .reduce((data, byte) => data + String.fromCharCode(byte), '',)
                 );
-                resolve('data:;base64,' + base64);
+                const contentType = res.headers['content-type'];
+                const data = contentType === 'application/pdf' ? base64 : `data:${contentType};base64,` + base64;
+                resolve(data);
             })
             .catch(err => {
                 if (err.response.status === 400 || err.response.status === 401) {

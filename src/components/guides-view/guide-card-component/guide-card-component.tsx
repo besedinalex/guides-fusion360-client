@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import {Link} from "react-router-dom";
 import Guide from "../../../interfaces/guide";
 import './guide-card-component.sass'
-import {getGuidePreview} from "../../../api/guides";
+import {getGuideFile} from "../../../api/guides";
 
 interface Hidden {
     hidden: boolean;
@@ -19,7 +19,7 @@ export default class GuideCardComponent extends Component<Guide & Hidden, State>
     }
 
     componentDidMount() {
-        getGuidePreview(this.props.id).then(data => this.setState({preview: data}));
+        getGuideFile(this.props.id, 'preview.png').then(data => this.setState({preview: data}));
     }
 
     render() {

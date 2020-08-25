@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import Glyphicon from '@strongdm/glyphicon';
 import HeaderComponent from "../../header-component/header-component";
 import {
-    getGuidePreview,
+    getGuideFile,
     getPartGuides,
     postModel,
     postNewPartGuide,
@@ -45,7 +45,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         // @ts-ignore
         const guideId = this.props.match.params.id;
         this.setState({guideId: guideId});
-        getGuidePreview(guideId)
+        getGuideFile(guideId, 'preview.png')
             .then(data => this.setState({preview: data}))
             .catch(() => this.setState({redirect: true}));
         getPartGuides(guideId)

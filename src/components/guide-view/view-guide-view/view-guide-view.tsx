@@ -2,8 +2,7 @@ import React, {Component} from "react";
 import {RouteComponentProps, Redirect, Link} from "react-router-dom";
 import HeaderComponent from "../../header-component/header-component";
 import PartGuide from "../../../interfaces/part-guide";
-import {getGuidePreview, getPartGuides} from "../../../api/guides";
-import {serverURL} from "../../../api/server-address";
+import {getGuideFile, getPartGuides} from "../../../api/guides";
 import './view-guide-view.sass';
 
 interface State {
@@ -13,6 +12,7 @@ interface State {
     currentGuideName: string;
     currentGuideContent: string;
     currentGuideType: string;
+    currentGuideFile: string;
     preview: string;
 }
 
@@ -25,6 +25,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
         currentGuideName: '',
         currentGuideContent: '',
         currentGuideType: '',
+        currentGuideFile: '',
         preview: ''
     };
 
@@ -32,7 +33,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
         // @ts-ignore
         const guideId = this.props.match.params.id;
         this.setState({guideId: guideId});
-        getGuidePreview(guideId)
+        getGuideFile(guideId, 'preview.png')
             .then(data => this.setState({preview: data}))
             .catch(() => this.setState({redirect: true}));
         getPartGuides(guideId)
@@ -42,7 +43,6 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
     }
 
     fillModalWindow(part: PartGuide) {
-        this.setState({currentGuideName: part.name, currentGuideContent: part.content});
         let type = '';
         if (/https?:\/\/(www\.)?(\w+\.)+(\w+)(\/(\w+|\?*|=*|\.)+)*/gi.test(part.content)) { // YouTube Video
             type = 'video';
@@ -51,11 +51,15 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
         } else {
             type = 'pdf';
         }
-        this.setState({currentGuideType: type});
+        if (type === 'archive' || type === 'pdf') {
+            getGuideFile(this.state.guideId, part.content)
+                .then(data => this.setState({currentGuideFile: data}))
+                .catch(message => alert(message));
+        }
+        this.setState({currentGuideName: part.name, currentGuideContent: part.content, currentGuideType: type});
     }
 
     modalWindowContent = () => {
-        const guideStorage = `${serverURL}/storage/${this.state.guideId}`;
         switch (this.state.currentGuideType) {
             case 'video':
                 return (
@@ -70,18 +74,29 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                 return (
                     <div className="modal-body" id="modal-body">
                         <p>Для данной сборки вам понадобятся уже заготовленные нами модели.</p>
-                        <a href={`${guideStorage}/${this.state.currentGuideContent}`}
-                           download={this.state.currentGuideContent}>
+                        <a href={this.state.currentGuideFile} download={this.state.currentGuideContent}>
                             Кликните, чтобы скачать готовые модели.
                         </a>
                         <br />
                     </div>
                 );
             default: // PDF
+                const byteCharacters = atob(this.state.currentGuideFile);
+                const byteArrays = [];
+                for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                    const slice = byteCharacters.slice(offset, offset + 512);
+                    const byteNumbers = new Array(slice.length);
+                    for (let i = 0; i < slice.length; i++) {
+                        byteNumbers[i] = slice.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    byteArrays.push(byteArray);
+                }
+                const blob = new Blob(byteArrays, {type: 'application/pdf'});
+                const data = URL.createObjectURL(blob) + '#view=fitH&toolbar=0';
                 return (
                     <div className="modal-body guide-modal" id="modal-body">
-                        <iframe src={`${guideStorage}/${this.state.currentGuideContent}#view=fitH&toolbar=0`}
-                                className="w-100 h-100" />
+                        <iframe src={data} title='PDF guide' className="w-100 h-100" />
                     </div>
                 );
         }
