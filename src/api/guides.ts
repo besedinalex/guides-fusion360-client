@@ -2,7 +2,7 @@ import axios from 'axios';
 import {serverURL} from "./server-address";
 import Guide from "../interfaces/guide";
 import PartGuide from "../interfaces/part-guide";
-import {signOut} from "./user-data";
+import {isAuthenticated, signOut} from "./user-data";
 
 export function getAllGuides(): Promise<Guide[]> {
     return new Promise((resolve, reject) => {
@@ -28,10 +28,11 @@ export function getAllHiddenGuides(): Promise<Guide[]> {
 
 export function getGuideFile(guideId: number, filename: string): Promise<string> {
     return new Promise((resolve, reject) => {
-        axios.get(`${serverURL}/guides/file/${guideId}`, {responseType: 'arraybuffer', params: {filename}})
+        const route = isAuthenticated ? 'file' : 'file-public';
+        axios.get(`${serverURL}/guides/${route}/${guideId}`, {responseType: 'arraybuffer', params: {filename}})
             .then(res => {
                 const base64 = btoa(new Uint8Array(res.data)
-                        .reduce((data, byte) => data + String.fromCharCode(byte), '',)
+                    .reduce((data, byte) => data + String.fromCharCode(byte), '',)
                 );
                 const contentType = res.headers['content-type'];
                 const data = contentType === 'application/pdf' ? base64 : `data:${contentType};base64,` + base64;
@@ -49,7 +50,8 @@ export function getGuideFile(guideId: number, filename: string): Promise<string>
 
 export function getPartGuides(guideId: number): Promise<PartGuide[]> {
     return new Promise((resolve, reject) => {
-        axios.get(`${serverURL}/guides/parts/${guideId}`)
+        const route = isAuthenticated ? 'parts' : 'parts-public';
+        axios.get(`${serverURL}/guides/${route}/${guideId}`)
             .then(res => resolve(res.data.data))
             .catch(err => reject(err.response.data.message));
     });
@@ -116,7 +118,7 @@ export function putPartGuide(id: number, name: string, content: string | File) {
 
 export function putPartGuidesSortKey(id1: number, id2: number) {
     return new Promise((resolve, reject) => {
-        axios.put(`${serverURL}/guides/switch`, null , {params: {partGuideId1: id1, partGuideId2: id2}})
+        axios.put(`${serverURL}/guides/switch`, null, {params: {partGuideId1: id1, partGuideId2: id2}})
             .then(resolve)
             .catch(err => reject(err.response.data.message));
     });
