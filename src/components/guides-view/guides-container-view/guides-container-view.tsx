@@ -46,7 +46,7 @@ export default class GuidesContainerView extends Component<RouteComponentProps, 
         return (
             <div>
                 <HeaderComponent />
-                <div className="album margin-after-header py-5">
+                <div className="album margin-after-header margin-before-footer py-5">
                     <div className="container">
                         <div className="row">
                             {this.state.guides.map((guide: Guide, i) => {

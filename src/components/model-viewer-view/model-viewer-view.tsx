@@ -220,7 +220,8 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
                 {this.state.annotations.map(annotation => {
                     const i = annotation.index;
                     return (
-                        <div id={`annotation-index-${i}`} className="annotation-number" onClick={() => this.hideAnnotation(i)} key={i}>
+                        <div id={`annotation-index-${i}`} className="annotation-number"
+                             onClick={() => this.hideAnnotation(i)} key={i}>
                             {i}
                         </div>
                     );

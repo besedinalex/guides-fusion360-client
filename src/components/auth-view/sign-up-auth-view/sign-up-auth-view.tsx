@@ -48,15 +48,15 @@ export default class SignUpAuthView extends Component<{}, State> {
                              alt="Logo" />
                     </Link>
                     <h1 className="h3 mb-3 font-weight-normal">Регистрация</h1>
-                    <input onChange={this.handleEmailChange} type="text" className="form-control form-control-top"
-                           placeholder="Электронная почта" autoFocus />
+                    <input onChange={this.handleEmailChange} type="text" name="email"
+                           className="form-control form-control-top" placeholder="Электронная почта" autoFocus />
                     <input onChange={this.handleFirstNameChange} type="text" className="form-control form-control-mid"
                            placeholder="Имя" />
                     <input onChange={this.handleLastNameChange} type="text" className="form-control form-control-mid"
                            placeholder="Фамилия" />
                     <input onChange={this.handlePasswordChange} type="password"
                            className="form-control form-control-bottom" placeholder="Пароль" />
-                    <Link to="/login" className="link">Уже есть аккаунт? Войди!</Link>
+                    <Link to="/login" className="link">Уже есть аккаунт? Войдите!</Link>
                     <button onClick={this.signUp} className="btn btn-lg btn-primary btn-block"
                             type="submit">Зарегистрироваться
                     </button>

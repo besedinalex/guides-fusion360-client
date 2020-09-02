@@ -8,6 +8,7 @@ import Page404View from "./components/page-404-view/page-404-view";
 import SignUpAuthView from "./components/auth-view/sign-up-auth-view/sign-up-auth-view";
 import CreateGuideView from "./components/guide-view/create-guide-view/create-guide-view";
 import EditGuideView from "./components/guide-view/edit-guide-view/edit-guide-view";
+import ForgotPasswordView from "./components/auth-view/forgot-password-view/forgot-password-view";
 import PrivateRouteComponent from "./components/route-component/private-route-component/private-route-component";
 import PublicOnlyRouteComponent from './components/route-component/public-only-route-component/public-only-route-component';
 import './App.sass';
@@ -28,6 +29,7 @@ export default class App extends Component {
                         <PrivateRouteComponent path="/edit/:id" component={EditGuideView} />
                         <PublicOnlyRouteComponent path="/login" component={SignInAuthView} />
                         <PublicOnlyRouteComponent path="/signup" component={SignUpAuthView} />
+                        <PublicOnlyRouteComponent path="/forgot-password" component={ForgotPasswordView} />
                         <Route component={Page404View} />
                     </Switch>
                 </div>

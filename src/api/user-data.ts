@@ -26,6 +26,17 @@ function postNewUser(firstName: string, lastName: string, email: string, passwor
     });
 }
 
+function restorePassword(restoreCode: string, password: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+        axios.put(`${serverURL}/users/restore-password`, null, {params: {restoreCode, password}})
+            .then(res => {
+                handleAuthentication(res.data.data);
+                resolve();
+            })
+            .catch(err => reject(err.response.data.message));
+    });
+}
+
 function signOut() {
     localStorage.removeItem('token');
     window.location.reload();
@@ -46,4 +57,4 @@ function updateAuthData() {
 
 updateAuthData();
 
-export {isAuthenticated, token, getToken, postNewUser, signOut}
+export {isAuthenticated, token, getToken, postNewUser, restorePassword, signOut}
