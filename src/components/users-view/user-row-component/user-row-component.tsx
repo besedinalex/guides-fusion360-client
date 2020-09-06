@@ -1,22 +1,28 @@
 import React, {Component} from "react";
 import User from '../../../interfaces/user';
 import Glyphicon from '@strongdm/glyphicon';
-import {deleteUser, updateUserAccess} from "../../../api/user-data";
+import {deleteUser, getPasswordRestoreCode, updateUserAccess} from "../../../api/user-data";
 
 export default class UserRowComponent extends Component<User, any> {
 
     handleAccessChange = access => {
         // eslint-disable-next-line no-restricted-globals
-        if (confirm(`Вы уверены, что хотите изменить уровень доступа пользователя '${this.props.firstName} ${this.props.lastName}'?`)) {
+        if (confirm(`Вы уверены, что хотите изменить уровень доступа пользователя ${this.props.firstName} ${this.props.lastName}?`)) {
             updateUserAccess(this.props.email, access)
                 .then(() => window.location.reload())
                 .catch(message => alert(message));
         }
     }
 
+    handleGetPasswordRestoreCode = () => {
+        getPasswordRestoreCode(this.props.email)
+            .then(code => alert(`Сообщите пользователю ${this.props.firstName} ${this.props.lastName} код ${code}.`))
+            .catch(message => alert(message));
+    }
+
     handleUserDelete = () => {
         const message =
-            `Вы уверены, что хотите удалить пользователя '${this.props.firstName} ${this.props.lastName}'? ` +
+            `Вы уверены, что хотите удалить пользователя ${this.props.firstName} ${this.props.lastName}? ` +
             'После удаления все гайды пользователя будут отмечены как ваши.';
         // eslint-disable-next-line no-restricted-globals
         if (confirm(message)) {
@@ -59,11 +65,19 @@ export default class UserRowComponent extends Component<User, any> {
                 <td>{this.props.email}</td>
                 <td>{access}</td>
                 <td>
+                    <button className="btn btn-sm m-0 p-0" title="Запросить код для восстановления пароля"
+                            onClick={this.handleGetPasswordRestoreCode}>
+                        <Glyphicon glyph="exclamation-sign" />
+                    </button>
+                </td>
+                <td>
                     <button className="btn btn-sm m-0 p-0" hidden={isAdmin} title={title}
                             onClick={() => this.handleAccessChange(newAccess)}>
                         <Glyphicon glyph={glyph} />
                     </button>
-                    <button className="btn btn-sm m-0 mx-2 p-0" hidden={isAdmin} title="Удалить пользователя"
+                </td>
+                <td>
+                    <button className="btn btn-sm m-0 p-0" hidden={isAdmin} title="Удалить пользователя"
                             onClick={this.handleUserDelete}>
                         <Glyphicon glyph="remove" />
                     </button>

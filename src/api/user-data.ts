@@ -22,7 +22,7 @@ function getUserAccess(): Promise<string> {
     });
 }
 
-function getToken(email: string, password: string): Promise<any> {
+export function getToken(email: string, password: string): Promise<any> {
     return new Promise((resolve, reject) => {
         axios.get(`${serverURL}/users/token`, {params: {email, password}})
             .then(res => {
@@ -35,7 +35,7 @@ function getToken(email: string, password: string): Promise<any> {
     });
 }
 
-function postNewUser(firstName: string, lastName: string, email: string, password: string): Promise<any> {
+export function postNewUser(firstName: string, lastName: string, email: string, password: string): Promise<any> {
     return new Promise((resolve, reject) => {
         axios.post(`${serverURL}/users/new`, {email, firstName, lastName, password})
             .then(res => {
@@ -46,7 +46,15 @@ function postNewUser(firstName: string, lastName: string, email: string, passwor
     });
 }
 
-function restorePassword(restoreCode: string, password: string): Promise<any> {
+export function getPasswordRestoreCode(email: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        axios.get(`${serverURL}/users/password-restore-code`, {params: {email}})
+            .then(res => resolve(res.data.data))
+            .catch(err => reject(err.response.data.message));
+    })
+}
+
+export function restorePassword(restoreCode: string, password: string): Promise<any> {
     return new Promise((resolve, reject) => {
         axios.put(`${serverURL}/users/restore-password`, null, {params: {restoreCode, password}})
             .then(res => {
@@ -57,7 +65,7 @@ function restorePassword(restoreCode: string, password: string): Promise<any> {
     });
 }
 
-function getAllUsers(): Promise<User[]> {
+export function getAllUsers(): Promise<User[]> {
     return new Promise((resolve, reject) => {
         axios.get(`${serverURL}/users/all`)
             .then(res => resolve(res.data.data))
@@ -65,7 +73,7 @@ function getAllUsers(): Promise<User[]> {
     });
 }
 
-function updateUserAccess(email: string, access: string): Promise<string> {
+export function updateUserAccess(email: string, access: string): Promise<string> {
     return new Promise((resolve, reject) => {
         axios.put(`${serverURL}/users/access`, {email, access})
             .then(res => resolve(res.data.data))
@@ -73,7 +81,7 @@ function updateUserAccess(email: string, access: string): Promise<string> {
     })
 }
 
-function deleteUser(email: string): Promise<number> {
+export function deleteUser(email: string): Promise<number> {
     return new Promise((resolve, reject) => {
         axios.delete(`${serverURL}/users/user`, {params: {email}})
             .then(res => resolve(res.data.damp))
@@ -81,7 +89,7 @@ function deleteUser(email: string): Promise<number> {
     })
 }
 
-function signOut() {
+export function signOut() {
     localStorage.removeItem('token');
     localStorage.removeItem('access');
     window.location.reload();
@@ -106,15 +114,4 @@ function updateAuthData() {
 
 updateAuthData();
 
-export {
-    isAuthenticated,
-    token,
-    userAccess,
-    getToken,
-    postNewUser,
-    restorePassword,
-    getAllUsers,
-    updateUserAccess,
-    deleteUser,
-    signOut
-}
+export {isAuthenticated, token, userAccess}

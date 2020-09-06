@@ -49,6 +49,8 @@ export default class UsersContainerView extends Component<any, State> {
                                     <th scope="col">Почта</th>
                                     <th scope="col">Уровень доступа</th>
                                     <th scope="col" />
+                                    <th scope="col" />
+                                    <th scope="col" />
                                 </tr>
                             </thead>
                             <tbody>
