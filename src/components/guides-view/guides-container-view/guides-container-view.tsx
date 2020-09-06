@@ -1,5 +1,4 @@
 import React, {Component} from "react";
-import {RouteComponentProps} from "react-router";
 import HeaderComponent from "../../header-component/header-component";
 import FooterComponent from "../../footer-component/footer-component";
 import GuideCardComponent from "../guide-card-component/guide-card-component";
@@ -13,7 +12,11 @@ interface State {
     redirect: boolean;
 }
 
-export default class GuidesContainerView extends Component<RouteComponentProps, State> {
+interface Props {
+    path: string
+}
+
+export default class GuidesContainerView extends Component<Props, State> {
 
     state = {
         hidden: false,
@@ -22,7 +25,6 @@ export default class GuidesContainerView extends Component<RouteComponentProps, 
     };
 
     componentDidMount() {
-        // @ts-ignore
         const hidden = this.props.path === '/hidden';
         this.setState({hidden});
         if (hidden) {
