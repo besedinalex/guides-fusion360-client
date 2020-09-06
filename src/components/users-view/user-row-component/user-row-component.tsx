@@ -16,7 +16,7 @@ export default class UserRowComponent extends Component<User, any> {
 
     handleUserDelete = () => {
         const message =
-            `Вы уверены, что хотите удалить пользователя '${this.props.firstName} ${this.props.lastName}'?` +
+            `Вы уверены, что хотите удалить пользователя '${this.props.firstName} ${this.props.lastName}'? ` +
             'После удаления все гайды пользователя будут отмечены как ваши.';
         // eslint-disable-next-line no-restricted-globals
         if (confirm(message)) {

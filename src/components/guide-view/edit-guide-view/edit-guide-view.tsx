@@ -7,14 +7,19 @@ import {
     postModel,
     postNewPartGuide,
     putPartGuide,
-    putPartGuidesSortKey
+    putPartGuidesSortKey,
+    removeGuide,
+    removePartGuide,
+    updateGuideVisibility
 } from "../../../api/guides";
 import PartGuide from "../../../interfaces/part-guide";
 import {Redirect, RouteComponentProps} from "react-router-dom";
+import {userAccess} from "../../../api/user-data";
 
 interface State {
-    redirect: boolean,
-    guideId: number,
+    redirect: boolean;
+    removedRedirect: boolean;
+    guideId: number;
     guides: Array<PartGuide>;
     currentMode: string;
     currentGuideId: number;
@@ -30,6 +35,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
     fileInput: React.RefObject<any>;
     state = {
         redirect: false,
+        removedRedirect: false,
         guideId: 0,
         guides: [],
         currentMode: 'guide',
@@ -74,6 +80,33 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
 
     handleGuidesSwitch = (id1, id2) => {
         putPartGuidesSortKey(id1, id2)
+            .catch(message => alert(message))
+            .finally(() => window.location.reload());
+    }
+
+    handlePublishGuide = () => {
+        const message =
+            'Вы уверены, что хотите опубликовать гайд? Гайд можно редактировать только когда он скрыт. ' +
+            'Вы сможете скрыть его обратно.';
+        // eslint-disable-next-line no-restricted-globals
+        if (confirm(message)) {
+            updateGuideVisibility(this.state.guideId, false)
+                .then(() => this.setState({redirect: true}))
+                .catch(message => alert(message));
+        }
+    }
+
+    handleRemoveGuide = () => {
+        // eslint-disable-next-line no-restricted-globals
+        if (confirm('Вы уверены, что хотите удалить гайд?')) {
+            removeGuide(this.state.guideId)
+                .then(() => this.setState({removedRedirect: true}))
+                .catch(message => alert(message));
+        }
+    }
+
+    handleRemovePartGuide = id => {
+        removePartGuide(id)
             .catch(message => alert(message))
             .finally(() => window.location.reload());
     }
@@ -156,6 +189,9 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         if (this.state.redirect) {
             return <Redirect to="/" />
         }
+        if (this.state.removedRedirect) {
+            return <Redirect to="/hidden" />
+        }
 
         return (
             <div>
@@ -174,12 +210,16 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                                     <span className="float-left">
                                         {guide.name}
                                     </span>
-                                    <button className="float-right badge badge-white"
+                                    <button className="float-right btn btn-sm m-0 mx-1 p-0"
+                                            onClick={() => this.handleRemovePartGuide(guide.id)}>
+                                        <Glyphicon glyph="remove" />
+                                    </button>
+                                    <button className="float-right btn btn-sm m-0 mx-1 p-0"
                                             disabled={i === this.state.guides.length - 1}
                                             onClick={() => this.handleDownButton(i)}>
                                         <Glyphicon glyph="chevron-down" />
                                     </button>
-                                    <button className="float-right badge badge-white" disabled={i === 0}
+                                    <button className="float-right btn btn-sm m-0 mx-1 p-0" disabled={i === 0}
                                             onClick={() => this.handleUpButton(i)}>
                                         <Glyphicon glyph="chevron-up" />
                                     </button>
@@ -187,14 +227,24 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                             )
                         })}
 
-                        <button className="list-group-item list-group-item-danger" data-toggle="modal"
+                        <button className="list-group-item list-group-item-primary" data-toggle="modal"
                                 data-target="#modal" onClick={() => this.fillModalWindow('guide')}>
                             Создать гайд
                         </button>
 
-                        <button className="list-group-item list-group-item-warning" data-toggle="modal"
+                        <button className="list-group-item list-group-item-primary" data-toggle="modal"
                                 data-target="#modal" onClick={() => this.fillModalWindow('model')}>
                             Загрузить модель
+                        </button>
+
+                        <button className="list-group-item list-group-item-warning" hidden={userAccess !== 'admin'}
+                                onClick={this.handlePublishGuide}>
+                            Опубликовать гайд
+                        </button>
+
+                        <button className="list-group-item list-group-item-danger" hidden={userAccess !== 'admin'}
+                                onClick={this.handleRemoveGuide}>
+                            Удалить гайд
                         </button>
                     </div>
                 </div>

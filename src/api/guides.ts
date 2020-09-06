@@ -111,3 +111,27 @@ export function putPartGuidesSortKey(id1: number, id2: number) {
             .catch(err => reject(err.response.data.message));
     });
 }
+
+export function updateGuideVisibility(id: number, hidden: boolean) {
+    return new Promise((resolve, reject) => {
+        axios.put(`${serverURL}/guides/hidden/${id}`, null, {params: {hidden}})
+            .then(resolve)
+            .catch(err => reject(err.response.data.message));
+    });
+}
+
+export function removeGuide(id: number) {
+    return new Promise((resolve, reject) => {
+        axios.delete(`${serverURL}/guides/guide/${id}`)
+            .then(resolve)
+            .catch(err => reject(err.response.data.message));
+    });
+}
+
+export function removePartGuide(id: number) {
+    return new Promise((resolve, reject) => {
+        axios.delete(`${serverURL}/guides/part-guide/${id}`)
+            .then(resolve)
+            .catch(err => reject(err.response.data.message));
+    });
+}
