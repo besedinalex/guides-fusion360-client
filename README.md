@@ -1,20 +1,39 @@
 # Beginner's guides to Fusion 360
 
-This small web site was created for very beginners (especially pupils) who have never worked with [Autodesk Fusion 360](https://www.autodesk.com/products/fusion-360/overview). Content of the site was made by students of [Moscow Polytechnic University](https://mospolytech.ru).
+This small web site was created for very beginners (especially pupils) who have never worked with [Autodesk Fusion 360](https://www.autodesk.com/products/fusion-360/overview). Content of the site is made by students of [Moscow Polytechnic University](https://mospolytech.ru).
 
 Every guide may have different quality and usefulness depending on who exactly made the one.
 
-This site is the new version of an [old project](https://github.com/BesedinAlex/guides-fusion360-old) which is now deprecated. It also uses data from server, that is developed in [separate repository](https://github.com/BesedinAlex/guides-fusion360-server).
+This site is the new version of an [old project](https://github.com/BesedinAlex/guides-fusion360-old) which is now deprecated.
 
-### Setup
+## Features
+
+- All data is provided by a certain [.NET Core server](https://github.com/besedinalex/guides-fusion360-server).
+
+**User:**
+- View guides and their files.
+- View 3D models (GLTF or GLB).
+
+**Editor:**
+- Create new guides.
+- Upload files for them.
+- Edit guides and their files.
+- Remove guides.
+
+**Admin:**
+- Publish or unpublish guides.
+- Control users accesses.
+- Remove users.
+
+## Setup
 
 Install Node.js from their [site](https://nodejs.org/en/download).
 
 Make sure that your CLI now handles `node` and `npm` commands.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
 ## Available Scripts
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 In the project directory, you can run:
 
