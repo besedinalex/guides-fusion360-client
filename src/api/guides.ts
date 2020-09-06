@@ -2,7 +2,7 @@ import axios from 'axios';
 import {serverURL} from "./server-address";
 import Guide from "../interfaces/guide";
 import PartGuide from "../interfaces/part-guide";
-import {isAuthenticated, signOut} from "./user-data";
+import {isAuthenticated} from "./user-data";
 
 export function getAllGuides(): Promise<Guide[]> {
     return new Promise((resolve, reject) => {
@@ -16,13 +16,7 @@ export function getAllHiddenGuides(): Promise<Guide[]> {
     return new Promise((resolve, reject) => {
         axios.get(`${serverURL}/guides/all-hidden`)
             .then(res => resolve(res.data.data))
-            .catch(err => {
-                if (err.response.status === 401 && err.response.data === '') {
-                    signOut();
-                } else {
-                    reject(err.response.data.message);
-                }
-            });
+            .catch(err => reject(err.response.data.message));
     });
 }
 
@@ -38,13 +32,7 @@ export function getGuideFile(guideId: number, filename: string): Promise<string>
                 const data = contentType === 'application/pdf' ? base64 : `data:${contentType};base64,` + base64;
                 resolve(data);
             })
-            .catch(err => {
-                if (err.response.status === 400 || err.response.status === 401) {
-                    signOut();
-                } else {
-                    reject(err.response.data.message);
-                }
-            });
+            .catch(err => reject(err.response.data.message));
     });
 }
 

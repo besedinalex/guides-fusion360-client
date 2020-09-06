@@ -2,7 +2,24 @@ import axios from 'axios';
 import {serverURL} from './server-address';
 
 let isAuthenticated;
+let userAccess;
 let token;
+
+function getUserAccess(): Promise<any> {
+    return new Promise((resolve, reject) => {
+        axios.get(`${serverURL}/users/access-self`)
+            .then(res => {
+                localStorage.setItem('access', res.data.data);
+                resolve();
+            })
+            .catch(err => {
+                if (err.response.status === 401) {
+                    signOut();
+                }
+                reject(err.response.data.message);
+            });
+    });
+}
 
 function getToken(email: string, password: string): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -52,9 +69,12 @@ function updateAuthData() {
     isAuthenticated = token !== null;
     if (isAuthenticated) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        getUserAccess()
+            .then(() => userAccess = localStorage.getItem('access'))
+            .catch(err => alert(err));
     }
 }
 
 updateAuthData();
 
-export {isAuthenticated, token, getToken, postNewUser, restorePassword, signOut}
+export {isAuthenticated, token, userAccess, getToken, postNewUser, restorePassword, signOut}

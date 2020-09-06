@@ -154,7 +154,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
 
     render() {
         if (this.state.redirect) {
-            return <Redirect to="/page404" />
+            return <Redirect to="/" />
         }
 
         return (

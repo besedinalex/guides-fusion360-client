@@ -3,11 +3,13 @@ import HeaderComponent from "../../header-component/header-component";
 import {postNewGuide} from "../../../api/guides";
 import {Redirect} from "react-router-dom";
 import './create-guide-view.sass';
+import {userAccess} from "../../../api/user-data";
 
 interface State {
     name: string;
     description: string;
     img: any;
+    redirectSuccess: boolean;
     redirect: boolean;
 }
 
@@ -18,11 +20,16 @@ export default class CreateGuideView extends Component<{}, State> {
         name: '',
         description: '',
         img: require('../../../assets/logo250.jpg'),
+        redirectSuccess: false,
         redirect: false
     };
 
     componentDidMount() {
         this.imgInput = React.createRef();
+        if (userAccess !== 'editor' && userAccess !== 'admin') {
+            alert('User access should be editor or admin.');
+            this.setState({redirect: true});
+        }
     }
 
     handleImgChange = (event) => {
@@ -50,14 +57,17 @@ export default class CreateGuideView extends Component<{}, State> {
             alert('Необходимо дать описание гайду.');
         } else {
             postNewGuide(this.state.name, this.state.description, this.imgInput.current.files[0])
-                .then(() => this.setState({redirect: true}))
+                .then(() => this.setState({redirectSuccess: true}))
                 .catch(message => alert(message));
         }
     };
 
     render() {
-        if (this.state.redirect) {
+        if (this.state.redirectSuccess) {
             return <Redirect to="/hidden" />;
+        }
+        if (this.state.redirect) {
+            return <Redirect to="/" />;
         }
         return (
             <div>
