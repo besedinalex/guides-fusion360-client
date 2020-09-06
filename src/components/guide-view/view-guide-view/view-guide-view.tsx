@@ -4,6 +4,7 @@ import HeaderComponent from "../../header-component/header-component";
 import PartGuide from "../../../interfaces/part-guide";
 import {getGuideFile, getPartGuides} from "../../../api/guides";
 import './view-guide-view.sass';
+import FooterComponent from "../../footer-component/footer-component";
 
 interface State {
     redirect: boolean;
@@ -110,7 +111,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
             <div>
                 <HeaderComponent />
 
-                <div className="container margin-after-header py-4">
+                <div className="container margin-after-header margin-before-footer py-4">
                     <img src={this.state.preview}
                          className="mx-auto w-50 h-50 d-block my-4 img-fluid border rounded border"
                          alt="Preview of the model." />
@@ -147,6 +148,8 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                         </div>
                     </div>
                 </div>
+
+                <FooterComponent />
             </div>
         );
     }
