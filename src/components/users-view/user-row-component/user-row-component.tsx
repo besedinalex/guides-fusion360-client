@@ -3,7 +3,54 @@ import User from '../../../interfaces/user';
 import Glyphicon from '@strongdm/glyphicon';
 import {deleteUser, getPasswordRestoreCode, updateUserAccess} from "../../../api/user-data";
 
-export default class UserRowComponent extends Component<User, any> {
+interface State {
+    color: string;
+    access: string;
+    title: string;
+    glyph: string;
+    newAccess: string;
+    isAdmin: boolean;
+}
+
+export default class UserRowComponent extends Component<User, State> {
+
+    state = {
+        color: '',
+        access: '',
+        title: '',
+        glyph: '',
+        newAccess: '',
+        isAdmin: false
+    }
+
+    componentDidMount() {
+        switch (this.props.access) {
+            case 'admin':
+                this.setState({
+                    color: 'table-success',
+                    access: 'Администратор',
+                    isAdmin: true
+                });
+                break;
+            case 'editor':
+                this.setState({
+                    color: 'table-primary',
+                    access: 'Редактор',
+                    title: 'Сделать пользователем',
+                    glyph: 'user',
+                    newAccess: 'unknown'
+                });
+                break;
+            default:
+                this.setState({
+                    color: 'table-warning',
+                    access: 'Пользователь',
+                    title: 'Сделать редактором',
+                    glyph: 'pencil',
+                    newAccess: 'editor'
+                });
+        }
+    }
 
     handleAccessChange = access => {
         // eslint-disable-next-line no-restricted-globals
@@ -33,37 +80,11 @@ export default class UserRowComponent extends Component<User, any> {
     }
 
     render() {
-        let color = '';
-        let access = '';
-        let title = '';
-        let glyph = '';
-        let newAccess = '';
-        let isAdmin = false;
-        switch (this.props.access) {
-            case 'admin':
-                color = 'table-success';
-                access = 'Администратор';
-                isAdmin = true;
-                break;
-            case 'editor':
-                color = 'table-primary';
-                access = 'Редактор';
-                title = 'Сделать пользователем';
-                glyph = 'user';
-                newAccess = 'unknown';
-                break;
-            default:
-                color = 'table-warning'
-                access = 'Пользователь';
-                title = 'Сделать редактором';
-                glyph = 'pencil';
-                newAccess = 'editor';
-        }
         return (
-            <tr className={color}>
+            <tr className={this.state.color}>
                 <th>{this.props.firstName} {this.props.lastName}</th>
                 <td>{this.props.email}</td>
-                <td>{access}</td>
+                <td>{this.state.access}</td>
                 <td>
                     <button className="btn btn-sm m-0 p-0" title="Запросить код для восстановления пароля"
                             onClick={this.handleGetPasswordRestoreCode}>
@@ -71,13 +92,13 @@ export default class UserRowComponent extends Component<User, any> {
                     </button>
                 </td>
                 <td>
-                    <button className="btn btn-sm m-0 p-0" hidden={isAdmin} title={title}
-                            onClick={() => this.handleAccessChange(newAccess)}>
-                        <Glyphicon glyph={glyph} />
+                    <button className="btn btn-sm m-0 p-0" hidden={this.state.isAdmin} title={this.state.title}
+                            onClick={() => this.handleAccessChange(this.state.newAccess)}>
+                        <Glyphicon glyph={this.state.glyph} />
                     </button>
                 </td>
                 <td>
-                    <button className="btn btn-sm m-0 p-0" hidden={isAdmin} title="Удалить пользователя"
+                    <button className="btn btn-sm m-0 p-0" hidden={this.state.isAdmin} title="Удалить пользователя"
                             onClick={this.handleUserDelete}>
                         <Glyphicon glyph="remove" />
                     </button>
