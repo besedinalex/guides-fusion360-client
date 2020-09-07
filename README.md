@@ -11,8 +11,9 @@ This site is the new version of an [old project](https://github.com/BesedinAlex/
 - All data is provided by a certain [.NET Core server](https://github.com/besedinalex/guides-fusion360-server).
 
 **User:**
-- View guides and their files.
-- View 3D models (GLTF or GLB).
+- View guides (PDF and embedded videos).
+- Download pre-made files (ZIP archives).
+- View 3D models (GLB).
 
 **Editor:**
 - Create new guides.

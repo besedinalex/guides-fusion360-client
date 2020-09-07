@@ -15,6 +15,7 @@ import {
 import PartGuide from "../../../interfaces/part-guide";
 import {Redirect, RouteComponentProps} from "react-router-dom";
 import {userAccess} from "../../../api/user-data";
+import $ from "jquery";
 
 interface State {
     redirect: boolean;
@@ -36,7 +37,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
     state = {
         redirect: false,
         removedRedirect: false,
-        guideId: 0,
+        guideId: null,
         guides: [],
         currentMode: 'guide',
         currentGuideId: 0,
@@ -50,7 +51,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
     componentDidMount() {
         // @ts-ignore
         const guideId = this.props.match.params.id;
-        this.setState({guideId: guideId});
+        this.setState({guideId});
         getGuideFile(guideId, 'preview.png')
             .then(data => this.setState({preview: data}))
             .catch(() => this.setState({redirect: true}));
@@ -58,6 +59,10 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
             .then(guides => this.setState({guides: guides.sort((a, b) => a.sortKey - b.sortKey)}))
             .catch(message => alert(message));
         this.fileInput = React.createRef();
+    }
+
+    componentWillUnmount() {
+        $("#modal").modal("hide");
     }
 
     handleNameChange = event => this.setState({changedGuideName: event.target.value});
@@ -257,7 +262,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                                 <h5 className="modal-title" id="modal-title">{this.state.currentGuideName}</h5>
                                 <button className="btn-sm btn btn-danger" data-dismiss="modal">X</button>
                             </div>
-                            <div className="modal-body guide-modal px-3" id="modal-body">
+                            <div className="modal-body py-0 px-3" id="modal-body">
 
                                 <div className="input-group my-2">
                                     <div className="input-group-prepend">

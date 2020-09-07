@@ -32,7 +32,11 @@ export function getGuideFile(guideId: number, filename: string): Promise<string>
                 const data = contentType === 'application/pdf' ? base64 : `data:${contentType};base64,` + base64;
                 resolve(data);
             })
-            .catch(err => reject(err.response.data.message));
+            .catch(err => {
+                // Decodes arraybuffer to string and parses it for json object
+                const errResponse = JSON.parse(new TextDecoder("utf-8").decode(err.response.data));
+                reject(errResponse.message)
+            });
     });
 }
 

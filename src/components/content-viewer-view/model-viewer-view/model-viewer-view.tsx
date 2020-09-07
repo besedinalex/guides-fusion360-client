@@ -5,10 +5,11 @@ import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {DRACOLoader} from "three/examples/jsm/loaders/DRACOLoader";
-import ModelAnnotation from "../../interfaces/model-annotation";
-import {getModelAnnotations} from "../../api/model-annotations";
+import ModelAnnotation from "../../../interfaces/model-annotation";
+import {getModelAnnotations} from "../../../api/model-annotations";
+import {getGuideFile} from "../../../api/guides";
 import './model-viewer-view.sass';
-import {getGuideFile} from "../../api/guides";
+import './../content-viewer-view.sass';
 
 interface State {
     modelId: number;
@@ -27,21 +28,19 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
     private mouse: THREE.Vector2;
     private animationStopped: boolean;
 
-    constructor(props: RouteComponentProps) {
-        super(props);
-
-        this.state = {
-            // @ts-ignore
-            modelId: this.props.match.params.id,
-            annotations: [],
-            redirect: false
-        };
-    }
+    state = {
+        modelId: null,
+        annotations: [],
+        redirect: false
+    };
 
     async componentDidMount() {
+        // @ts-ignore
+        const modelId = Number(this.props.match.params.id);
+        this.setState({modelId});
         let model;
         try {
-            model = await getGuideFile(this.state.modelId, 'model.glb');
+            model = await getGuideFile(modelId, 'model.glb');
         } catch (e) {
             alert(e);
             this.setState({redirect: true});
@@ -98,11 +97,11 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
 
         window.addEventListener('resize', this.onWindowResize);
 
-        getModelAnnotations(this.state.modelId)
-            .then(annotations => {
-                annotations.map((annotation, i) => annotation.index = i + 1);
-                this.setState({annotations: annotations});
-            });
+        // getModelAnnotations(this.state.modelId)
+        //     .then(annotations => {
+        //         annotations.map((annotation, i) => annotation.index = i + 1);
+        //         this.setState({annotations: annotations});
+        //     });
 
         this.animate();
     }
@@ -201,12 +200,12 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         }
 
         return (
-            <div ref={(host) => this.host = host} onClick={this.getCoordinatesOfClick}>
-                <Link to="/" className="viewer-btn home">
-                    <img className="viewer-btn-img" src={require('../../assets/home.png')} alt="Return home" />
+            <div className="viewer" ref={(host) => this.host = host} onClick={this.getCoordinatesOfClick}>
+                <Link to="/" className="viewer-btn model-viewer-home">
+                    <img className="viewer-btn-img" src={require('../../../assets/home.png')} alt="Return home" />
                 </Link>
-                <Link to={`/guide/${this.state.modelId}`} className="viewer-btn return">
-                    <img className="viewer-btn-img" src={require('../../assets/return.png')} alt="Return to guide" />
+                <Link to={`/guide/${this.state.modelId}`} className="viewer-btn model-viewer-return">
+                    <img className="viewer-btn-img" src={require('../../../assets/return.png')} alt="Return to guide" />
                 </Link>
 
                 {this.state.annotations.map(annotation => {

@@ -3,8 +3,11 @@ import {RouteComponentProps, Redirect, Link} from "react-router-dom";
 import HeaderComponent from "../../header-component/header-component";
 import PartGuide from "../../../interfaces/part-guide";
 import {getGuideFile, getPartGuides} from "../../../api/guides";
-import './view-guide-view.sass';
 import FooterComponent from "../../footer-component/footer-component";
+import base64ToBlob from "../../../services/base64ToBlob";
+import Glyphicon from '@strongdm/glyphicon';
+import $ from 'jquery';
+import './view-guide-view.sass';
 
 interface State {
     redirect: boolean;
@@ -21,7 +24,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
 
     state = {
         redirect: false,
-        guideId: 0,
+        guideId: null,
         guides: [],
         currentGuideName: '',
         currentGuideContent: '',
@@ -33,7 +36,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
     componentDidMount() {
         // @ts-ignore
         const guideId = this.props.match.params.id;
-        this.setState({guideId: guideId});
+        this.setState({guideId});
         getGuideFile(guideId, 'preview.png')
             .then(data => this.setState({preview: data}))
             .catch(() => this.setState({redirect: true}));
@@ -41,6 +44,10 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
             .then(guides =>
                 this.setState({guides: guides.sort(((a, b) => a.sortKey - b.sortKey))}))
             .catch(message => alert(message));
+    }
+
+    componentWillUnmount() {
+        $("#modal").modal("hide");
     }
 
     fillModalWindow(part: PartGuide) {
@@ -82,25 +89,25 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                     </div>
                 );
             default: // PDF
-                const byteCharacters = atob(this.state.currentGuideFile);
-                const byteArrays = [];
-                for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-                    const slice = byteCharacters.slice(offset, offset + 512);
-                    const byteNumbers = new Array(slice.length);
-                    for (let i = 0; i < slice.length; i++) {
-                        byteNumbers[i] = slice.charCodeAt(i);
-                    }
-                    const byteArray = new Uint8Array(byteNumbers);
-                    byteArrays.push(byteArray);
-                }
-                const blob = new Blob(byteArrays, {type: 'application/pdf'});
-                const data = URL.createObjectURL(blob) + '#view=fitH&toolbar=0';
+                const data = URL.createObjectURL(base64ToBlob(this.state.currentGuideFile)) + '#view=fitH&toolbar=0';
                 return (
                     <div className="modal-body guide-modal" id="modal-body">
                         <iframe src={data} title='PDF guide' className="w-100 h-100" />
                     </div>
                 );
         }
+    }
+
+    pdfLink = () => {
+        if (this.state.currentGuideType === 'pdf') {
+            return (
+                <Link to={`/document/${this.state.guideId}?filename=${this.state.currentGuideContent}`}
+                      className="mx-2" target="_blank" title='Открыть файл в новой вкладке'>
+                    <Glyphicon glyph="new-window" />
+                </Link>
+            );
+        }
+        return <div />;
     }
 
     render() {
@@ -127,8 +134,9 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                             );
                         })}
                         <li className="px-2 py-2">
-                            <Link to={`/model/${this.state.guideId}`} className="btn btn-warning text-white">Посмотреть
-                                в 3D</Link>
+                            <Link to={`/model/${this.state.guideId}`} className="btn btn-info">
+                                Посмотреть в 3D
+                            </Link>
                         </li>
                     </ul>
                 </div>
@@ -139,7 +147,11 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                          className={this.state.currentGuideType === 'pdf' ? 'modal-dialog modal-xl h-90' : 'modal-dialog modal-xl'}>
                         <div className="modal-content h-100">
                             <div className="modal-header">
-                                <h5 className="modal-title" id="modal-title">{this.state.currentGuideName}</h5>
+                                <div className="modal-title" id="modal-title">
+                                    <h5 className="d-inline">{this.state.currentGuideName}</h5>
+                                    {this.pdfLink()}
+                                </div>
+                                {/*<h5 className="modal-title" id="modal-title">{this.state.currentGuideName}</h5>*/}
                             </div>
                             {this.modalWindowContent()} {/*Modal body*/}
                             <div className="modal-footer">

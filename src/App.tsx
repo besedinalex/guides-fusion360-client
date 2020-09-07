@@ -2,7 +2,8 @@ import React, {Component} from 'react';
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import GuidesContainerView from "./components/guides-view/guides-container-view/guides-container-view";
 import ViewGuideView from "./components/guide-view/view-guide-view/view-guide-view";
-import ModelViewerView from "./components/model-viewer-view/model-viewer-view";
+import ModelViewerView from "./components/content-viewer-view/model-viewer-view/model-viewer-view";
+import PdfViewerView from "./components/content-viewer-view/pdf-viewer-view/pdf-viewer-view";
 import SignInAuthView from "./components/auth-view/sign-in-auth-view/sign-in-auth-view";
 import Page404View from "./components/page-404-view/page-404-view";
 import SignUpAuthView from "./components/auth-view/sign-up-auth-view/sign-up-auth-view";
@@ -25,6 +26,7 @@ export default class App extends Component {
                         <Route exact path="/" component={GuidesContainerView} />
                         <Route path="/guide/:id" component={ViewGuideView} />
                         <Route path="/model/:id" component={ModelViewerView} />
+                        <Route path="/document/:id" component={PdfViewerView} />
                         <PrivateRouteComponent path="/create" component={CreateGuideView} />
                         <PrivateRouteComponent path="/hidden" component={GuidesContainerView} />
                         <PrivateRouteComponent path="/edit/:id" component={EditGuideView} />
