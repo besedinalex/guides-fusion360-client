@@ -1,17 +1,18 @@
 .annotation, .annotation-number
   position: absolute
   color: #fff
-  background-color: rgba(0, 0, 0, 0.8)
   box-sizing: unset
 
 .annotation
+  word-break: break-word
   margin-left: 15px
   margin-top: 15px
   padding: 1em
-  width: 200px
+  width: 152px
   border-radius: .5em
   font-size: 12px
   line-height: 1.2
+  background-color: rgba(0, 0, 0, 0.8)
 
 .annotation-number
   width: 30px
@@ -21,6 +22,7 @@
   font-size: 15px
   line-height: 30px
   text-align: center
+  background-color: rgba(86, 61, 124, 0.8)
 
 .hidden
   opacity: 0
@@ -32,3 +34,23 @@
 
 .model-viewer-return
   top: 80px
+
+.model-viewer-annotate
+  top: 140px
+
+.annotations-create-container
+  position: fixed
+  float: right
+  width: 300px
+  text-align: center
+  color: white
+  background-color: rgba(86, 61, 124, 0.8)
+  border-radius: 10px
+  right: 20px
+  top: 20px
+  padding-bottom: 0
+  margin-bottom: 0
+
+.annotations-create
+  padding: 5px
+  margin: 5px

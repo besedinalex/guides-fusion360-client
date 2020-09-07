@@ -13,12 +13,13 @@ This site is the new version of an [old project](https://github.com/BesedinAlex/
 **User:**
 - View guides (PDF and embedded videos).
 - Download pre-made files (ZIP archives).
-- View 3D models (GLB).
+- View 3D models (GLB) and their annotations.
 
 **Editor:**
 - Create new guides.
 - Upload files for them.
 - Edit guides and their files.
+- Edit model annotations.
 - Remove guides.
 
 **Admin:**

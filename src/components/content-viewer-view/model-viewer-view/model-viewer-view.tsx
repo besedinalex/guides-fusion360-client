@@ -6,15 +6,19 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {DRACOLoader} from "three/examples/jsm/loaders/DRACOLoader";
 import ModelAnnotation from "../../../interfaces/model-annotation";
-import {getModelAnnotations} from "../../../api/model-annotations";
+import {deleteModelAnnotation, getModelAnnotations, postModelAnnotation} from "../../../api/model-annotations";
 import {getGuideFile} from "../../../api/guides";
 import './model-viewer-view.sass';
 import './../content-viewer-view.sass';
+import {userAccess} from "../../../api/user-data";
 
 interface State {
     modelId: number;
-    annotations: Array<ModelAnnotation>;
+    annotations: ModelAnnotation[];
     redirect: boolean;
+    mode: string;
+    annotationName: string;
+    annotationText: string;
 }
 
 export default class ModelViewerView extends Component<RouteComponentProps, State> {
@@ -31,7 +35,10 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
     state = {
         modelId: null,
         annotations: [],
-        redirect: false
+        redirect: false,
+        mode: 'view',
+        annotationName: '',
+        annotationText: ''
     };
 
     async componentDidMount() {
@@ -97,11 +104,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
 
         window.addEventListener('resize', this.onWindowResize);
 
-        // getModelAnnotations(this.state.modelId)
-        //     .then(annotations => {
-        //         annotations.map((annotation, i) => annotation.index = i + 1);
-        //         this.setState({annotations: annotations});
-        //     });
+        await this.getAnnotations();
 
         this.animate();
     }
@@ -147,23 +150,41 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     };
 
-    getCoordinatesOfClick = (event) => {
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-        const intersects = this.raycaster.intersectObjects(this.scene.children, true);
-        if (intersects.length !== 0) {
-            const currentPoint = intersects[0].point;
-            console.log(currentPoint);
+    handleAddAnnotation = event => {
+        event.preventDefault();
+        if (this.state.mode === 'annotate') {
+            this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            this.raycaster.setFromCamera(this.mouse, this.camera);
+            const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+            if (intersects.length !== 0) {
+                if (this.state.annotationName === '') {
+                    alert('Необходимо ввести имя аннотации.');
+                    return;
+                }
+                const currentPoint = intersects[0].point;
+                const {x, y, z} = currentPoint;
+                const {modelId, annotationName, annotationText} = this.state;
+                postModelAnnotation(modelId, x, y, z, annotationName, annotationText)
+                    .then(() => this.getAnnotations())
+                    .catch(message => alert(message));
+            }
         }
     };
 
+    getAnnotations = () => {
+        this.setState({annotations: []});
+        getModelAnnotations(this.state.modelId)
+            .then(annotations => {
+                annotations.map((annotation, i) => annotation.index = i + 1);
+                this.setState({annotations});
+            })
+            .catch(message => console.log(message));
+    }
+
     hideAnnotation(index: number) {
         const annotation = document.querySelector('#annotation-' + index);
-        const annotationText = document.querySelector('#annotation-text-' + index);
         const hidden: boolean = annotation.classList.contains('hidden');
-        const text = this.state.annotations.find(obj => obj.index === index).text;
-        annotationText.innerHTML = hidden ? text : '';
         if (hidden) {
             annotation.classList.remove('hidden');
         } else {
@@ -194,33 +215,83 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         }
     }
 
+    handleAnnotationNameChange = e => this.setState({annotationName: e.target.value});
+
+    handleAnnotationTextChange = e => this.setState({annotationText: e.target.value});
+
+    handleDeleteAnnotationClick = id => deleteModelAnnotation(id).catch(message => alert(message));
+
+    annotationButtonClicked = () => this.setState({mode: this.state.mode === 'view' ? 'annotate' : 'view'});
+
+    annotationsMenu = () => {
+        if (this.state.mode === 'annotate') {
+            return (
+                <div className="annotations-create-container">
+                    <div className="annotations-create">
+                        <label>Новая аннотация</label>
+                        <input type="text" id="name" className="form-control" placeholder="Имя аннотации"
+                               onChange={this.handleAnnotationNameChange} />
+                        <textarea className="form-control my-2" rows={5} maxLength={255} placeholder="Текст аннотации"
+                                  onChange={this.handleAnnotationTextChange} />
+                        <p className="m-0">
+                            <i>
+                                Введите имя и текст аннотации и нажмите туда, где вы хотите её поставить.
+                            </i>
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+        return <div />;
+    }
+
     render() {
         if (this.state.redirect) {
             return <Redirect to={`/guide/${this.state.modelId}`} />;
         }
 
         return (
-            <div className="viewer" ref={(host) => this.host = host} onClick={this.getCoordinatesOfClick}>
+            <div className="viewer" ref={(host) => this.host = host} onClick={this.handleAddAnnotation}>
+
                 <Link to="/" className="viewer-btn model-viewer-home">
-                    <img className="viewer-btn-img" src={require('../../../assets/home.png')} alt="Return home" />
+                    <img className="viewer-btn-img" src={require('../../../assets/home.png')}
+                         alt="Return to home page" />
                 </Link>
                 <Link to={`/guide/${this.state.modelId}`} className="viewer-btn model-viewer-return">
-                    <img className="viewer-btn-img" src={require('../../../assets/return.png')} alt="Return to guide" />
+                    <img className="viewer-btn-img" src={require('../../../assets/return.png')}
+                         alt="Return to guide page" />
                 </Link>
+
+                <div hidden={userAccess !== 'editor' && userAccess !== 'admin'}
+                     className="viewer-btn model-viewer-annotate" onClick={this.annotationButtonClicked}>
+                    <img className="viewer-btn-img" src={require('../../../assets/annotate.png')}
+                         alt="Add annotation window" />
+                </div>
+
+                {this.annotationsMenu()}
 
                 {this.state.annotations.map(annotation => {
                     const i = annotation.index;
                     return (
                         <div id={`annotation-${i}`} className="annotation hidden" key={i}>
-                            <span id={`annotation-text-${i}`} />
+                            <h6>{annotation.name}</h6>
+                            <p className="my-1">{annotation.text}</p>
+                            <button hidden={userAccess !== 'editor' && userAccess !== 'admin'}
+                                    className="btn btn-danger btn-sm" onClick={() => {
+                                this.handleDeleteAnnotationClick(annotation.id)
+                                    .then(() => this.getAnnotations())
+                                    .catch(message => alert(message));
+                            }}>
+                                Удалить аннотацию
+                            </button>
                         </div>
                     );
                 })}
                 {this.state.annotations.map(annotation => {
                     const i = annotation.index;
                     return (
-                        <div id={`annotation-index-${i}`} className="annotation-number"
-                             onClick={() => this.hideAnnotation(i)} key={i}>
+                        <div id={`annotation-index-${i}`} className="annotation-number" key={i}
+                             onClick={() => this.hideAnnotation(i)}>
                             {i}
                         </div>
                     );
