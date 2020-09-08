@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import Glyphicon from '@strongdm/glyphicon';
 import HeaderComponent from "../../header-component/header-component";
 import PartGuide from "../../../interfaces/part-guide";
-import {Redirect, RouteComponentProps} from "react-router-dom";
+import {Link, Redirect, RouteComponentProps} from "react-router-dom";
 import {userAccess} from "../../../api/user-data";
 import $ from "jquery";
 import {getGuideOwnerInfo, getPartGuidesSorted} from "../../../services/guidesData";
@@ -218,7 +218,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
 
                         {this.state.guides.map((guide, i) => {
                             return (
-                                <div className="list-group-item list-group-item-success" key={i} data-toggle="modal"
+                                <button className="list-group-item list-group-item-success" key={i} data-toggle="modal"
                                      data-target="#modal" onClick={() => this.fillModalWindow('guide', guide)}>
                                     <span className="float-left">
                                         {guide.name}
@@ -236,7 +236,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                                             onClick={() => this.handleUpButton(i)}>
                                         <Glyphicon glyph="chevron-up" />
                                     </button>
-                                </div>
+                                </button>
                             )
                         })}
 
@@ -249,6 +249,11 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                                 data-target="#modal" onClick={() => this.fillModalWindow('model')}>
                             Загрузить модель
                         </button>
+
+                        <Link to={`/guide/${this.state.guideId}`} style={{color: "inherit"}}
+                              className="list-group-item list-group-item-info text-center text-decoration-none">
+                            Предпросмотр гайда
+                        </Link>
 
                         <button className="list-group-item list-group-item-warning" hidden={userAccess !== 'admin'}
                                 onClick={this.handlePublishGuide}>
