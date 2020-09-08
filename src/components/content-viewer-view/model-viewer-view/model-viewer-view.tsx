@@ -109,6 +109,11 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
     }
 
     componentWillUnmount() {
+        if (this.scene === undefined) {
+            return;
+        }
+
+        // Disposing of all viewer objects that can be disposed
         cancelAnimationFrame(this.animationId);
         this.controls.dispose();
         this.renderer.domElement.addEventListener('dblclick', null, false);
