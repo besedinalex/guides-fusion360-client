@@ -1,21 +1,15 @@
 import React, {Component} from "react";
 import Glyphicon from '@strongdm/glyphicon';
 import HeaderComponent from "../../header-component/header-component";
-import {
-    getGuideFile,
-    getPartGuides,
-    postModel,
-    postNewPartGuide,
-    putPartGuide,
-    putPartGuidesSortKey,
-    removeGuide,
-    removePartGuide,
-    updateGuideVisibility
-} from "../../../api/guides";
 import PartGuide from "../../../interfaces/part-guide";
 import {Redirect, RouteComponentProps} from "react-router-dom";
 import {userAccess} from "../../../api/user-data";
 import $ from "jquery";
+import {getGuideOwnerInfo, getPartGuidesSorted} from "../../../services/guidesData";
+import {
+    getGuideFile, postModel, postNewPartGuide, putPartGuide, putPartGuidesSortKey, removeGuide, removePartGuide,
+    updateGuideVisibility
+} from "../../../api/guides";
 
 interface State {
     redirect: boolean;
@@ -29,6 +23,7 @@ interface State {
     changedGuideVideoLink: string;
     changedFileName: string;
     preview: string;
+    guideOwner: string;
 }
 
 export default class EditGuideView extends Component<RouteComponentProps, State> {
@@ -45,20 +40,23 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         changedGuideName: '',
         changedGuideVideoLink: '',
         changedFileName: '',
-        preview: ''
+        preview: '',
+        guideOwner: ''
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         // @ts-ignore
         const guideId = this.props.match.params.id;
         this.setState({guideId});
-        getGuideFile(guideId, 'preview.png')
-            .then(data => this.setState({preview: data}))
-            .catch(() => this.setState({redirect: true}));
-        getPartGuides(guideId)
-            .then(guides => this.setState({guides: guides.sort((a, b) => a.sortKey - b.sortKey)}))
-            .catch(message => alert(message));
+        try {
+            this.setState({preview: await getGuideFile(guideId, 'preview.png')});
+        } catch {
+            this.setState({redirect: true});
+            return;
+        }
         this.fileInput = React.createRef();
+        this.setState({guides: await getPartGuidesSorted(guideId)});
+        this.setState({guideOwner: await getGuideOwnerInfo(guideId)});
     }
 
     componentWillUnmount() {
@@ -190,6 +188,16 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         }
     };
 
+    ownerInfo = () => {
+        if (userAccess === 'editor' || userAccess === 'admin') {
+            return (
+                <h6 className="text-center mb-3">
+                    Автор гайда: {this.state.guideOwner}
+                </h6>
+            );
+        }
+    }
+
     render() {
         if (this.state.redirect) {
             return <Redirect to="/" />
@@ -205,7 +213,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                 <div className="container margin-after-header py-4 justify-content-center">
                     <img src={this.state.preview} alt="Preview of the model."
                          className="mx-auto w-50 h-50 d-block my-4 img-fluid border rounded border" />
-
+                    {this.ownerInfo()}
                     <div className="list-group w-50 m-auto">
 
                         {this.state.guides.map((guide, i) => {

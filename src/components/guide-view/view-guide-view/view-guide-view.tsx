@@ -2,12 +2,14 @@ import React, {Component} from "react";
 import {RouteComponentProps, Redirect, Link} from "react-router-dom";
 import HeaderComponent from "../../header-component/header-component";
 import PartGuide from "../../../interfaces/part-guide";
-import {getGuideFile, getPartGuides} from "../../../api/guides";
+import {getGuideFile, getGuideOwner, getPartGuides} from "../../../api/guides";
 import FooterComponent from "../../footer-component/footer-component";
 import base64ToBlob from "../../../services/base64ToBlob";
 import Glyphicon from '@strongdm/glyphicon';
 import $ from 'jquery';
 import './view-guide-view.sass';
+import {userAccess} from "../../../api/user-data";
+import {getGuideOwnerInfo} from "../../../services/guidesData";
 
 interface State {
     redirect: boolean;
@@ -18,6 +20,7 @@ interface State {
     currentGuideType: string;
     currentGuideFile: string;
     preview: string;
+    guideOwner: string;
 }
 
 export default class ViewGuideView extends Component<RouteComponentProps, State> {
@@ -30,20 +33,22 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
         currentGuideContent: '',
         currentGuideType: '',
         currentGuideFile: '',
-        preview: ''
+        preview: '',
+        guideOwner: 'Test'
     };
 
-    componentDidMount() {
+    async componentDidMount() {
         // @ts-ignore
         const guideId = this.props.match.params.id;
         this.setState({guideId});
-        getGuideFile(guideId, 'preview.png')
-            .then(data => this.setState({preview: data}))
-            .catch(() => this.setState({redirect: true}));
-        getPartGuides(guideId)
-            .then(guides =>
-                this.setState({guides: guides.sort(((a, b) => a.sortKey - b.sortKey))}))
-            .catch(message => alert(message));
+        try {
+            this.setState({preview: await getGuideFile(guideId, 'preview.png')});
+        } catch {
+            this.setState({redirect: true});
+            return;
+        }
+        this.setState({guides: await getPartGuides(guideId)});
+        this.setState({guideOwner: await getGuideOwnerInfo(guideId)});
     }
 
     componentWillUnmount() {
@@ -64,7 +69,11 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                 .then(data => this.setState({currentGuideFile: data}))
                 .catch(message => alert(message));
         }
-        this.setState({currentGuideName: part.name, currentGuideContent: part.content, currentGuideType: type});
+        this.setState({
+            currentGuideName: part.name,
+            currentGuideContent: part.content,
+            currentGuideType: type
+        });
     }
 
     modalWindowContent = () => {
@@ -88,11 +97,17 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                         <br />
                     </div>
                 );
-            default: // PDF
+            case 'pdf':
                 const data = URL.createObjectURL(base64ToBlob(this.state.currentGuideFile)) + '#view=fitH&toolbar=0';
                 return (
                     <div className="modal-body guide-modal" id="modal-body">
                         <iframe src={data} title='PDF guide' className="w-100 h-100" />
+                    </div>
+                );
+            default:
+                return (
+                    <div className="modal-body" id="modal-body">
+                        <h3 className="text-center mt-3">Неизвестный формат гайда.</h3>
                     </div>
                 );
         }
@@ -107,7 +122,16 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                 </Link>
             );
         }
-        return <div />;
+    }
+
+    ownerInfo = () => {
+        if (userAccess === 'editor' || userAccess === 'admin') {
+            return (
+                <h6 className="text-center">
+                    Автор гайда: {this.state.guideOwner}
+                </h6>
+            );
+        }
     }
 
     render() {
@@ -122,6 +146,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                     <img src={this.state.preview}
                          className="mx-auto w-50 h-50 d-block my-4 img-fluid border rounded border"
                          alt="Preview of the model." />
+                    {this.ownerInfo()}
                     <ul className="nav justify-content-center">
                         {this.state.guides.map((guide: PartGuide, i) => {
                             return (

@@ -2,5 +2,5 @@ export default interface User {
     email: string;
     firstName: string;
     lastName: string;
-    access: string;
+    access?: string;
 }

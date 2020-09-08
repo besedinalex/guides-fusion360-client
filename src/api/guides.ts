@@ -3,6 +3,7 @@ import {serverURL} from "./server-address";
 import Guide from "../interfaces/guide";
 import PartGuide from "../interfaces/part-guide";
 import {isAuthenticated} from "./user-data";
+import User from "../interfaces/user";
 
 export function getAllGuides(): Promise<Guide[]> {
     return new Promise((resolve, reject) => {
@@ -47,6 +48,14 @@ export function getPartGuides(guideId: number): Promise<PartGuide[]> {
             .then(res => resolve(res.data.data))
             .catch(err => reject(err.response.data.message));
     });
+}
+
+export function getGuideOwner(guideId: number): Promise<User> {
+    return new Promise((resolve, reject) => {
+        axios.get(`${serverURL}/guides/owner/${guideId}`)
+            .then(res => resolve(res.data.data))
+            .catch(err => reject(err.response.data.message));
+    })
 }
 
 export function postNewGuide(name: string, description: string, image: File) {
