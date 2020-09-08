@@ -151,9 +151,8 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                                     <h5 className="d-inline">{this.state.currentGuideName}</h5>
                                     {this.pdfLink()}
                                 </div>
-                                {/*<h5 className="modal-title" id="modal-title">{this.state.currentGuideName}</h5>*/}
                             </div>
-                            {this.modalWindowContent()} {/*Modal body*/}
+                            {this.modalWindowContent()}
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-danger" data-dismiss="modal">Закрыть</button>
                             </div>

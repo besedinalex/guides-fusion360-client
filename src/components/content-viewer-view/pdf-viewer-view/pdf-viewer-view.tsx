@@ -55,7 +55,7 @@ export default class PdfViewerView extends Component<RouteComponentProps, State>
         }
 
         return (
-            <div>
+            <div className="viewer">
                 <Link to="/" className="viewer-btn pdf-viewer-home">
                     <img className="viewer-btn-img" src={require('../../../assets/home.png')} alt="Return home" />
                 </Link>
