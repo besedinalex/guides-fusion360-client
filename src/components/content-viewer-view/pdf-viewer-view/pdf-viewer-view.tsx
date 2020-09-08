@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import {Link, Redirect, RouteComponentProps} from "react-router-dom";
 import {getGuideFile} from "../../../api/guides";
-import base64ToBlob from "../../../services/base64ToBlob";
+import {base64ToBlob} from "../../../services/base64";
 import './../content-viewer-view.sass';
 import './pdf-viewer-view.sass';
 
@@ -23,18 +23,18 @@ export default class PdfViewerView extends Component<RouteComponentProps, State>
         windowHeight: window.innerHeight
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         // @ts-ignore
         const guideId = Number(this.props.match.params.id);
         this.setState({guideId});
         const filename = new URLSearchParams(window.location.search).get('filename');
-        getGuideFile(guideId, filename)
-            .then(data => this.setState({pdfFile: URL.createObjectURL(base64ToBlob(data))}))
-            .catch(message => {
-                alert(message);
-                this.setState({redirect: true});
-            });
-
+        try {
+            const pdfBase64 = await getGuideFile(guideId, filename);
+            this.setState({pdfFile: URL.createObjectURL(base64ToBlob(pdfBase64))});
+        } catch (message) {
+            alert(message);
+            this.setState({redirect: true});
+        }
         window.addEventListener('resize', this.onWindowResize);
     }
 

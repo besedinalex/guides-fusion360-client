@@ -17,11 +17,11 @@ export default class ForgotPasswordView extends Component<{}, State> {
         redirect: false
     };
 
-    handleRestoreCodeChange = (e) => this.setState({restoreCode: e.target.value});
+    handleRestoreCodeChange = e => this.setState({restoreCode: e.target.value});
 
-    handlePasswordChange = (e) => this.setState({password: e.target.value});
+    handlePasswordChange = e => this.setState({password: e.target.value});
 
-    signIn = (event) => {
+    signIn = event => {
         event.preventDefault();
         restorePassword(this.state.restoreCode, this.state.password)
             .then(() => this.setState({redirect: true}))
@@ -45,7 +45,8 @@ export default class ForgotPasswordView extends Component<{}, State> {
                     <input autoComplete="new-password" onChange={this.handlePasswordChange} type="password"
                            className="form-control form-control-bottom" placeholder="Пароль" />
                     <Link to="/login" className="link">Вспомнили пароль?</Link>
-                    <button onClick={this.signIn} className="btn btn-lg btn-primary btn-block" type="submit">Войти
+                    <button onClick={this.signIn} className="btn btn-lg btn-primary btn-block" type="submit">
+                        Войти
                     </button>
                     <p className="mt-2 mb-3 text-muted">© 2019-{new Date().getFullYear()}</p>
                 </form>

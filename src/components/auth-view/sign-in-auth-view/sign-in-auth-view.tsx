@@ -17,11 +17,11 @@ export default class SignInAuthView extends Component<{}, State> {
         redirect: false
     };
 
-    handleEmailChange = (e) => this.setState({email: e.target.value});
+    handleEmailChange = e => this.setState({email: e.target.value});
 
-    handlePasswordChange = (e) => this.setState({password: e.target.value});
+    handlePasswordChange = e => this.setState({password: e.target.value});
 
-    signIn = (event) => {
+    signIn = event => {
         event.preventDefault();
         getToken(this.state.email, this.state.password)
             .then(() => this.setState({redirect: true}))

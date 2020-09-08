@@ -21,15 +21,15 @@ export default class SignUpAuthView extends Component<{}, State> {
         redirect: false
     };
 
-    handleEmailChange = (e) => this.setState({email: e.target.value});
+    handleEmailChange = e => this.setState({email: e.target.value});
 
-    handleFirstNameChange = (e) => this.setState({firstName: e.target.value});
+    handleFirstNameChange = e => this.setState({firstName: e.target.value});
 
-    handleLastNameChange = (e) => this.setState({lastName: e.target.value});
+    handleLastNameChange = e => this.setState({lastName: e.target.value});
 
-    handlePasswordChange = (e) => this.setState({password: e.target.value});
+    handlePasswordChange = e => this.setState({password: e.target.value});
 
-    signUp = (event) => {
+    signUp = event => {
         event.preventDefault();
         postNewUser(this.state.firstName, this.state.lastName, this.state.email, this.state.password)
             .then(() => this.setState({redirect: true}))
@@ -57,8 +57,8 @@ export default class SignUpAuthView extends Component<{}, State> {
                     <input onChange={this.handlePasswordChange} type="password"
                            className="form-control form-control-bottom" placeholder="Пароль" />
                     <Link to="/login" className="link">Уже есть аккаунт? Войдите!</Link>
-                    <button onClick={this.signUp} className="btn btn-lg btn-primary btn-block"
-                            type="submit">Зарегистрироваться
+                    <button onClick={this.signUp} className="btn btn-lg btn-primary btn-block" type="submit">
+                        Зарегистрироваться
                     </button>
                     <p className="mt-2 mb-3 text-muted">© 2019-{new Date().getFullYear()}</p>
                 </form>

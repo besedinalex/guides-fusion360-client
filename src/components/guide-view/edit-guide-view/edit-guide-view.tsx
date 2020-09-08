@@ -5,7 +5,7 @@ import PartGuide from "../../../interfaces/part-guide";
 import {Link, Redirect, RouteComponentProps} from "react-router-dom";
 import {userAccess} from "../../../api/user-data";
 import $ from "jquery";
-import {getGuideOwnerInfo, getPartGuidesSorted} from "../../../services/guidesData";
+import {getGuideOwnerInfo, getPartGuidesSorted} from "../../../services/guides-view-data";
 import {
     getGuideFile, postModel, postNewPartGuide, putPartGuide, putPartGuidesSortKey, removeGuide, removePartGuide,
     updateGuideVisibility
@@ -15,7 +15,7 @@ interface State {
     redirect: boolean;
     removedRedirect: boolean;
     guideId: number;
-    guides: Array<PartGuide>;
+    guides: PartGuide[];
     currentMode: string;
     currentGuideId: number;
     currentGuideName: string;
@@ -90,7 +90,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
     handlePublishGuide = () => {
         const message =
             'Вы уверены, что хотите опубликовать гайд? Гайд можно редактировать только когда он скрыт. ' +
-            'Вы сможете скрыть его обратно.';
+            'Вы сможете скрыть его позже.';
         // eslint-disable-next-line no-restricted-globals
         if (confirm(message)) {
             updateGuideVisibility(this.state.guideId, false)
@@ -108,11 +108,11 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         }
     }
 
-    handleRemovePartGuide = id => {
+    handleRemovePartGuide = id =>
         removePartGuide(id)
             .catch(message => alert(message))
             .finally(() => window.location.reload());
-    }
+
 
     handleSubmit = () => {
         // Poor validation
@@ -156,8 +156,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                     'Проверяйте результат загрузки путем открытия модели на странице гайда.' +
                     '\nНажмите ОК, чтобы продолжить.');
                 postModel(this.state.guideId, this.fileInput.current.files[0])
-                    .catch(message => alert(message))
-                    .finally(() => window.location.reload());
+                    .catch(message => alert(message));
             } else {
                 alert('Необходимо выбрать STP файл для загрузки');
             }
@@ -218,7 +217,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
 
                         {this.state.guides.map((guide, i) => {
                             return (
-                                <button className="list-group-item list-group-item-success" key={i} data-toggle="modal"
+                                <div className="list-group-item list-group-item-success" key={i} data-toggle="modal"
                                      data-target="#modal" onClick={() => this.fillModalWindow('guide', guide)}>
                                     <span className="float-left">
                                         {guide.name}
@@ -236,7 +235,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                                             onClick={() => this.handleUpButton(i)}>
                                         <Glyphicon glyph="chevron-up" />
                                     </button>
-                                </button>
+                                </div>
                             )
                         })}
 
@@ -252,7 +251,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
 
                         <Link to={`/guide/${this.state.guideId}`} style={{color: "inherit"}}
                               className="list-group-item list-group-item-info text-center text-decoration-none">
-                            Предпросмотр гайда
+                            Просмотр гайда
                         </Link>
 
                         <button className="list-group-item list-group-item-warning" hidden={userAccess !== 'admin'}
@@ -275,8 +274,8 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                                 <h5 className="modal-title" id="modal-title">{this.state.currentGuideName}</h5>
                                 <button className="btn-sm btn btn-danger" data-dismiss="modal">X</button>
                             </div>
-                            <div className="modal-body py-0 px-3" id="modal-body">
 
+                            <div className="modal-body py-0 px-3" id="modal-body">
                                 <div className="input-group my-2">
                                     <div className="input-group-prepend">
                                         <span className="input-group-text">Название</span>
@@ -306,6 +305,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                                     </div>
                                 </div>
                             </div>
+
                             <div className="modal-footer">
                                 <button className="btn btn-info" onClick={this.handleSubmit}>Загрузить</button>
                             </div>

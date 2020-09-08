@@ -61,11 +61,10 @@ export default class UserRowComponent extends Component<User, State> {
         }
     }
 
-    handleGetPasswordRestoreCode = () => {
+    handleGetPasswordRestoreCode = () =>
         getPasswordRestoreCode(this.props.email)
             .then(code => alert(`Сообщите пользователю ${this.props.firstName} ${this.props.lastName} код ${code}.`))
             .catch(message => alert(message));
-    }
 
     handleUserDelete = () => {
         const message =

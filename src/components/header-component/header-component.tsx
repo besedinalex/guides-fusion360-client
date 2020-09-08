@@ -1,13 +1,13 @@
 import React, {Component} from "react";
 import {Link} from "react-router-dom";
-import './header-component.sass';
 import {signOut, isAuthenticated, userAccess} from "../../api/user-data";
+import './header-component.sass';
 
 export default class HeaderComponent extends Component {
 
     whatIsNextMessage = e => {
         e.preventDefault();
-        alert('Обратитесь к Антону Витальевичу, чтобы получить право на редактирование гайдов.');
+        alert('Обратитесь к Антону Витальевичу, чтобы получить право на редактирование.');
     }
 
     render() {
@@ -24,9 +24,7 @@ export default class HeaderComponent extends Component {
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav mr-auto">
                         <li hidden={!isAuthenticated || isEditor} className="nav-item">
-                            <Link to="" onClick={this.whatIsNextMessage} className="nav-link">
-                                Что дальше?
-                            </Link>
+                            <Link to="/" onClick={this.whatIsNextMessage} className="nav-link">Что дальше?</Link>
                         </li>
                         <li hidden={!isEditor} className="nav-item">
                             <Link to="/create" className="nav-link">Создать</Link>
@@ -41,12 +39,9 @@ export default class HeaderComponent extends Component {
                     <Link to="/login" hidden={isAuthenticated} className="navbar-right">
                         <button className="btn btn-light">Войти</button>
                     </Link>
-                    <button onClick={signOut} hidden={!isAuthenticated} className="btn btn-danger">
-                        Выйти
-                    </button>
+                    <button onClick={signOut} hidden={!isAuthenticated} className="btn btn-danger">Выйти</button>
                 </div>
             </header>
-
         );
     }
 }

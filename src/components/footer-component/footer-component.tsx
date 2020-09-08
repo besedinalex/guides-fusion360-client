@@ -12,7 +12,8 @@ export default class FooterComponent extends Component {
                     </span>
                     <br />
                     <span>
-                        Узнать больше про Fusion 360 можно на сайте <a className="text-warning" href="https://autodesk.com/products/fusion-360/overview">Autodesk</a>.
+                        Узнать больше про Fusion 360 можно на сайте <a className="text-warning"
+                                                                       href="https://autodesk.com/products/fusion-360/overview">Autodesk</a>.
                     </span>
                 </div>
             </footer>

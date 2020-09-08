@@ -20,7 +20,7 @@ export function postModelAnnotation(guideId: number, x: number, y: number, z: nu
     });
 }
 
-export function deleteModelAnnotation(annotationId: number): Promise<any> {
+export function deleteModelAnnotation(annotationId: number): Promise<null> {
     return new Promise((resolve, reject) => {
         axios.delete(`${serverURL}/model-annotations/annotation/${annotationId}`)
             .then(res => resolve(res.data.data))

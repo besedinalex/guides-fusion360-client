@@ -3,7 +3,7 @@ import User from "../../../interfaces/user";
 import {getAllUsers} from "../../../api/user-data";
 import HeaderComponent from "../../header-component/header-component";
 import FooterComponent from "../../footer-component/footer-component";
-import {Redirect} from "react-router-dom";
+import {Redirect, RouteComponentProps} from "react-router-dom";
 import UserRowComponent from "../user-row-component/user-row-component";
 
 interface State {
@@ -11,7 +11,7 @@ interface State {
     redirect: boolean;
 }
 
-export default class UsersContainerView extends Component<any, State> {
+export default class UsersContainerView extends Component<RouteComponentProps, State> {
 
     state = {
         users: [],
@@ -34,7 +34,7 @@ export default class UsersContainerView extends Component<any, State> {
         if (this.state.redirect) {
             return <Redirect to="/" />
         }
-        console.log(this.state.users);
+
         return (
             <div>
                 <HeaderComponent />

@@ -8,9 +8,9 @@ import {DRACOLoader} from "three/examples/jsm/loaders/DRACOLoader";
 import ModelAnnotation from "../../../interfaces/model-annotation";
 import {deleteModelAnnotation, getModelAnnotations, postModelAnnotation} from "../../../api/model-annotations";
 import {getGuideFile} from "../../../api/guides";
+import {userAccess} from "../../../api/user-data";
 import './model-viewer-view.sass';
 import './../content-viewer-view.sass';
-import {userAccess} from "../../../api/user-data";
 
 interface State {
     modelId: number;
@@ -30,7 +30,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
     private controls: OrbitControls;
     private raycaster: THREE.Raycaster;
     private mouse: THREE.Vector2;
-    private animationStopped: boolean;
+    private animationId: number;
 
     state = {
         modelId: null,
@@ -48,13 +48,11 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         let model;
         try {
             model = await getGuideFile(modelId, 'model.glb');
-        } catch (e) {
-            alert(e);
+        } catch (message) {
+            alert(message);
             this.setState({redirect: true});
             return;
         }
-
-        this.animationStopped = false;
 
         this.scene = new THREE.Scene();
 
@@ -90,45 +88,70 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         const gltfLoader = new GLTFLoader();
         gltfLoader.setDRACOLoader(new DRACOLoader().setDecoderPath(`https://www.gstatic.com/draco/v1/decoders/`));
         gltfLoader.load(model, loadedGLTF => {
-            const modelBoundingBox = new THREE.Box3().setFromObject(loadedGLTF.scene) as any;
-            modelBoundingBox.size = {};
-            modelBoundingBox.size.x = modelBoundingBox.max.x - modelBoundingBox.min.x;
-            modelBoundingBox.size.y = modelBoundingBox.max.y - modelBoundingBox.min.y;
-            modelBoundingBox.size.z = modelBoundingBox.max.z - modelBoundingBox.min.z;
-            const objectSize = Math.max(modelBoundingBox.getSize().y, modelBoundingBox.getSize().x);
+            loadedGLTF.scene.children.map(obj => this.scene.add(obj));
+
+            // Center any model
+            const modelBoundingBox = new THREE.Box3().setFromObject(this.scene);
+            const sizeX = modelBoundingBox.max.x - modelBoundingBox.min.x;
+            const sizeY = modelBoundingBox.max.y - modelBoundingBox.min.y;
+            const sizeZ = modelBoundingBox.max.z - modelBoundingBox.min.z;
+            const objectSize = Math.max(sizeY, sizeX);
             const offset = objectSize / (2 * Math.tan(this.camera.fov * (Math.PI / 360)));
             this.camera.position.set(offset, offset, offset);
-            this.controls.target = modelBoundingBox.getCenter();
-            this.scene.add(loadedGLTF.scene);
+            this.controls.target = modelBoundingBox.getCenter(new THREE.Vector3(sizeX, sizeY, sizeZ));
         });
+
+        this.animate();
 
         window.addEventListener('resize', this.onWindowResize);
 
         await this.getAnnotations();
-
-        this.animate();
     }
 
     componentWillUnmount() {
-        this.scene = undefined;
+        cancelAnimationFrame(this.animationId);
+        this.controls.dispose();
+        this.renderer.domElement.addEventListener('dblclick', null, false);
+        this.renderer.dispose();
+        window.removeEventListener('resize', this.onWindowResize);
+
+        const disposeObj = (obj) => {
+            if (obj.children) {
+                obj.children.map(child => disposeObj(child));
+            }
+
+            if (obj.geometry) {
+                obj.geometry.dispose();
+            }
+
+            if (obj.material) {
+                if (obj.material.map) {
+                    obj.material.map.dispose();
+                }
+                obj.material.dispose();
+            }
+        }
+        this.scene.traverse(obj => disposeObj(obj));
+
+        this.animationId = undefined;
+        this.mouse = undefined;
+        this.raycaster = undefined;
+        this.controls = undefined;
         this.camera = undefined;
         this.renderer = undefined;
-        this.controls = undefined;
-        this.mouse = undefined;
-        this.animationStopped = true;
+        this.scene = undefined;
         this.host = undefined;
-        window.removeEventListener('resize', this.onWindowResize);
     }
 
+
     animate = () => {
-        if (this.animationStopped) {
-            return;
-        }
-        requestAnimationFrame(this.animate);
+        this.animationId = requestAnimationFrame(this.animate);
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
         const width = this.renderer.domElement.width / 2 / window.devicePixelRatio;
         const height = this.renderer.domElement.height / 2 / window.devicePixelRatio;
+
+        // Annotations
         for (const obj of this.state.annotations as Array<ModelAnnotation>) {
             const p2 = new THREE.Vector3(obj.x, obj.y, obj.z);
             const annotation = document.querySelector('#annotation-' + obj.index) as HTMLFormElement;
@@ -234,15 +257,12 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
                         <textarea className="form-control my-2" rows={5} maxLength={255} placeholder="Текст аннотации"
                                   onChange={this.handleAnnotationTextChange} />
                         <p className="m-0">
-                            <i>
-                                Введите имя и текст аннотации и нажмите туда, где вы хотите её поставить.
-                            </i>
+                            Введите имя и текст аннотации и нажмите туда, где вы хотите её поставить.
                         </p>
                     </div>
                 </div>
             );
         }
-        return <div />;
     }
 
     render() {
@@ -278,15 +298,16 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
                             <p className="my-1">{annotation.text}</p>
                             <button hidden={userAccess !== 'editor' && userAccess !== 'admin'}
                                     className="btn btn-danger btn-sm" onClick={() => {
-                                this.handleDeleteAnnotationClick(annotation.id)
-                                    .then(() => this.getAnnotations())
-                                    .catch(message => alert(message));
+                                        this.handleDeleteAnnotationClick(annotation.id)
+                                            .then(() => this.getAnnotations())
+                                            .catch(message => alert(message));
                             }}>
                                 Удалить аннотацию
                             </button>
                         </div>
                     );
                 })}
+
                 {this.state.annotations.map(annotation => {
                     const i = annotation.index;
                     return (

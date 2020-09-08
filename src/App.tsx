@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {Redirect} from "react-router";
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import GuidesContainerView from "./components/guides-view/guides-container-view/guides-container-view";
 import ViewGuideView from "./components/guide-view/view-guide-view/view-guide-view";
@@ -11,13 +12,18 @@ import CreateGuideView from "./components/guide-view/create-guide-view/create-gu
 import EditGuideView from "./components/guide-view/edit-guide-view/edit-guide-view";
 import UsersContainerView from "./components/users-view/users-container-view/users-container-view";
 import ForgotPasswordView from "./components/auth-view/forgot-password-view/forgot-password-view";
-import PrivateRouteComponent from "./components/route-component/private-route-component/private-route-component";
-import PublicOnlyRouteComponent from './components/route-component/public-only-route-component/public-only-route-component';
+import {updateAuthData, isAuthenticated} from "./api/user-data";
 import './App.sass';
 import 'bootstrap/dist/js/bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 
 export default class App extends Component {
+
+    async componentDidMount() {
+        await updateAuthData();
+        this.setState({});
+    }
+
     render() {
         return (
             <Router>
@@ -40,4 +46,20 @@ export default class App extends Component {
             </Router>
         );
     }
+}
+
+function PrivateRouteComponent({component: Component, ...rest}) {
+    return (
+        <Route {...rest}
+               render={props => isAuthenticated ? (<Component {...rest} {...props} />) : (<Redirect to="/login" />)}
+        />
+    );
+}
+
+function PublicOnlyRouteComponent({component: Component, ...rest}) {
+    return (
+        <Route {...rest}
+               render={props => isAuthenticated ? (<Redirect to="/" />) : (<Component {...rest} {...props} />)}
+        />
+    );
 }

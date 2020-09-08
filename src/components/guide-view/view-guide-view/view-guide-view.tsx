@@ -2,14 +2,14 @@ import React, {Component} from "react";
 import {RouteComponentProps, Redirect, Link} from "react-router-dom";
 import HeaderComponent from "../../header-component/header-component";
 import PartGuide from "../../../interfaces/part-guide";
-import {getGuideFile, getGuideOwner, getPartGuides} from "../../../api/guides";
+import {getGuideFile} from "../../../api/guides";
 import FooterComponent from "../../footer-component/footer-component";
-import base64ToBlob from "../../../services/base64ToBlob";
+import {base64ToBlob} from "../../../services/base64";
 import Glyphicon from '@strongdm/glyphicon';
 import $ from 'jquery';
-import './view-guide-view.sass';
 import {userAccess} from "../../../api/user-data";
-import {getGuideOwnerInfo} from "../../../services/guidesData";
+import {getGuideOwnerInfo, getPartGuidesSorted} from "../../../services/guides-view-data";
+import './view-guide-view.sass';
 
 interface State {
     redirect: boolean;
@@ -47,7 +47,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
             this.setState({redirect: true});
             return;
         }
-        this.setState({guides: await getPartGuides(guideId)});
+        this.setState({guides: await getPartGuidesSorted(guideId)});
         this.setState({guideOwner: await getGuideOwnerInfo(guideId)});
     }
 
@@ -116,8 +116,8 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
     pdfLink = () => {
         if (this.state.currentGuideType === 'pdf') {
             return (
-                <Link to={`/document/${this.state.guideId}?filename=${this.state.currentGuideContent}`}
-                      className="mx-2" target="_blank" title='Открыть файл в новой вкладке'>
+                <Link to={`/document/${this.state.guideId}?filename=${this.state.currentGuideContent}`} className="mx-2"
+                      title='Открыть файл в новой вкладке'>
                     <Glyphicon glyph="new-window" />
                 </Link>
             );
@@ -159,9 +159,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                             );
                         })}
                         <li className="px-2 py-2">
-                            <Link to={`/model/${this.state.guideId}`} className="btn btn-info">
-                                Посмотреть в 3D
-                            </Link>
+                            <Link to={`/model/${this.state.guideId}`} className="btn btn-info">Посмотреть в 3D</Link>
                         </li>
                     </ul>
                 </div>

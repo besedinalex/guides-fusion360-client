@@ -2,13 +2,13 @@ import React, {Component} from "react";
 import HeaderComponent from "../../header-component/header-component";
 import {postNewGuide} from "../../../api/guides";
 import {Redirect} from "react-router-dom";
-import './create-guide-view.sass';
 import {userAccess} from "../../../api/user-data";
+import './create-guide-view.sass';
 
 interface State {
     name: string;
     description: string;
-    img: any;
+    img: string;
     redirectSuccess: boolean;
     redirect: boolean;
 }
@@ -27,12 +27,11 @@ export default class CreateGuideView extends Component<{}, State> {
     componentDidMount() {
         this.imgInput = React.createRef();
         if (userAccess !== 'editor' && userAccess !== 'admin') {
-            alert('User access should be editor or admin.');
             this.setState({redirect: true});
         }
     }
 
-    handleImgChange = (event) => {
+    handleImgChange = event => {
         try {
             this.setState({img: URL.createObjectURL(event.target.files[0])});
         } catch (e) {
@@ -40,11 +39,11 @@ export default class CreateGuideView extends Component<{}, State> {
         }
     };
 
-    handleNameChange = (event) => this.setState({name: event.target.value});
+    handleNameChange = event => this.setState({name: event.target.value});
 
-    handleDescriptionChange = (event) => this.setState({description: event.target.value});
+    handleDescriptionChange = event => this.setState({description: event.target.value});
 
-    handleSubmit = (event) => {
+    handleSubmit = event => {
         event.preventDefault();
         const imgInput = this.imgInput.current;
         if (imgInput === null || imgInput.files.length === 0) {
@@ -69,13 +68,13 @@ export default class CreateGuideView extends Component<{}, State> {
         if (this.state.redirect) {
             return <Redirect to="/" />;
         }
+
         return (
             <div>
                 <HeaderComponent />
 
                 <div className="container margin-after-header py-4">
                     <h3>Создание гайда</h3>
-
                     <form className="form">
                         <div className="form-group image-upload">
                             <label>Изображение (PNG)</label>

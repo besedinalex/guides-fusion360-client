@@ -3,7 +3,7 @@ import HeaderComponent from "../../header-component/header-component";
 import FooterComponent from "../../footer-component/footer-component";
 import GuideCardComponent from "../guide-card-component/guide-card-component";
 import Guide from "../../../interfaces/guide";
-import {getAllGuides, getAllHiddenGuides} from "../../../api/guides";
+import {getPublicGuides, getHiddenGuides} from "../../../api/guides";
 import {Redirect} from "react-router-dom";
 
 interface State {
@@ -24,20 +24,15 @@ export default class GuidesContainerView extends Component<Props, State> {
         redirect: false
     };
 
-    componentDidMount() {
+    async componentDidMount() {
         const hidden = this.props.path === '/hidden';
         this.setState({hidden});
-        if (hidden) {
-            getAllHiddenGuides()
-                .then(data => this.setState({guides: data}))
-                .catch(message => {
-                    alert(message);
-                    this.setState({redirect: true});
-                });
-        } else {
-            getAllGuides()
-                .then(data => this.setState({guides: data}))
-                .catch(message => alert(message));
+        try {
+            const guides = hidden ? await getHiddenGuides() : await getPublicGuides();
+            this.setState({guides});
+        } catch (message) {
+            alert(message);
+            this.setState({redirect: hidden});
         }
     }
 
@@ -45,9 +40,11 @@ export default class GuidesContainerView extends Component<Props, State> {
         if (this.state.redirect) {
             return <Redirect to="/" />
         }
+
         return (
             <div>
                 <HeaderComponent />
+
                 <div className="album margin-after-header margin-before-footer py-5">
                     <div className="container">
                         <div className="row">
@@ -60,6 +57,7 @@ export default class GuidesContainerView extends Component<Props, State> {
                         </div>
                     </div>
                 </div>
+
                 <FooterComponent />
             </div>
         );

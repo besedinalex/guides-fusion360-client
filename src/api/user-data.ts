@@ -2,44 +2,25 @@ import axios from 'axios';
 import {serverURL} from './server-address';
 import User from "../interfaces/user";
 
-let isAuthenticated;
-let userAccess;
-let token;
+export let isAuthenticated: boolean;
+export let userAccess: string;
 
-function getUserAccess(): Promise<string> {
-    return new Promise((resolve, reject) => {
-        axios.get(`${serverURL}/users/access-self`)
-            .then(res => {
-                localStorage.setItem('access', res.data.data);
-                resolve();
-            })
-            .catch(err => {
-                if (err.response.status === 401) {
-                    signOut();
-                }
-                reject(err.response.data.message);
-            });
-    });
-}
-
-export function getToken(email: string, password: string): Promise<any> {
+export function getToken(email: string, password: string): Promise<null> {
     return new Promise((resolve, reject) => {
         axios.get(`${serverURL}/users/token`, {params: {email, password}})
-            .then(res => {
-                handleAuthentication(res.data.data);
-                getUserAccess()
-                    .then(() => resolve())
-                    .catch(message => alert(message));
+            .then(async res => {
+                await handleAuthentication(res.data.data);
+                resolve();
             })
             .catch(err => reject(err.response.data.message));
     });
 }
 
-export function postNewUser(firstName: string, lastName: string, email: string, password: string): Promise<any> {
+export function postNewUser(firstName: string, lastName: string, email: string, password: string): Promise<null> {
     return new Promise((resolve, reject) => {
         axios.post(`${serverURL}/users/new`, {email, firstName, lastName, password})
-            .then(res => {
-                handleAuthentication(res.data.data);
+            .then(async res => {
+                await handleAuthentication(res.data.data);
                 resolve();
             })
             .catch(err => reject(err.response.data.message));
@@ -91,27 +72,27 @@ export function deleteUser(email: string): Promise<number> {
 
 export function signOut() {
     localStorage.removeItem('token');
-    localStorage.removeItem('access');
     window.location.reload();
 }
 
-function handleAuthentication(session) {
-    localStorage.setItem('token', session);
-    updateAuthData();
+async function handleAuthentication(token: string) {
+    localStorage.setItem('token', token);
+    await updateAuthData();
 }
 
-function updateAuthData() {
-    token = localStorage.getItem('token');
+export async function updateAuthData() {
+    const token = localStorage.getItem('token');
     isAuthenticated = token !== null;
     if (isAuthenticated) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        userAccess = localStorage.getItem('access');
-        getUserAccess()
-            .then(() => userAccess = localStorage.getItem('access'))
-            .catch(message => alert(message));
+        try {
+            const userAccessReq = await axios.get(`${serverURL}/users/access-self`);
+            userAccess = userAccessReq.data.data;
+        } catch (e) {
+            if (e.response.status === 401) {
+                signOut();
+            }
+            alert(e.response.data.message);
+        }
     }
 }
-
-updateAuthData();
-
-export {isAuthenticated, token, userAccess}
