@@ -12,7 +12,7 @@ import CreateGuideView from "./components/guide-view/create-guide-view/create-gu
 import EditGuideView from "./components/guide-view/edit-guide-view/edit-guide-view";
 import UsersContainerView from "./components/users-view/users-container-view/users-container-view";
 import ForgotPasswordView from "./components/auth-view/forgot-password-view/forgot-password-view";
-import {updateAuthData, isAuthenticated} from "./api/user-data";
+import {isAuthenticated, updateAccessData} from "./api/user-data";
 import './App.sass';
 import 'bootstrap/dist/js/bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -20,7 +20,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 export default class App extends Component {
 
     async componentDidMount() {
-        await updateAuthData();
+        await updateAccessData();
         this.setState({});
     }
 

@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {Link, Redirect} from "react-router-dom";
-import {restorePassword} from "../../../api/user-data";
+import {restorePassword, updateAccessData} from "../../../api/user-data";
 import '../auth-view.sass';
 
 interface State {
@@ -21,11 +21,15 @@ export default class ForgotPasswordView extends Component<{}, State> {
 
     handlePasswordChange = e => this.setState({password: e.target.value});
 
-    signIn = event => {
+    signIn = async event => {
         event.preventDefault();
-        restorePassword(this.state.restoreCode, this.state.password)
-            .then(() => this.setState({redirect: true}))
-            .catch(message => alert(message));
+        try {
+            await restorePassword(this.state.restoreCode, this.state.password);
+            await updateAccessData();
+            this.setState({redirect: true});
+        } catch (message) {
+            alert(message);
+        }
     };
 
     render() {

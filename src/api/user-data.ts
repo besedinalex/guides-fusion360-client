@@ -8,8 +8,8 @@ export let userAccess: string;
 export function getToken(email: string, password: string): Promise<null> {
     return new Promise((resolve, reject) => {
         axios.get(`${serverURL}/users/token`, {params: {email, password}})
-            .then(async res => {
-                await handleAuthentication(res.data.data);
+            .then(res => {
+                handleAuthentication(res.data.data);
                 resolve();
             })
             .catch(err => reject(err.response.data.message));
@@ -19,8 +19,8 @@ export function getToken(email: string, password: string): Promise<null> {
 export function postNewUser(firstName: string, lastName: string, email: string, password: string): Promise<null> {
     return new Promise((resolve, reject) => {
         axios.post(`${serverURL}/users/new`, {email, firstName, lastName, password})
-            .then(async res => {
-                await handleAuthentication(res.data.data);
+            .then(res => {
+                handleAuthentication(res.data.data);
                 resolve();
             })
             .catch(err => reject(err.response.data.message));
@@ -59,7 +59,7 @@ export function updateUserAccess(email: string, access: string): Promise<string>
         axios.put(`${serverURL}/users/access`, {email, access})
             .then(res => resolve(res.data.data))
             .catch(err => reject(err.response.data.message));
-    })
+    });
 }
 
 export function deleteUser(email: string): Promise<number> {
@@ -67,7 +67,7 @@ export function deleteUser(email: string): Promise<number> {
         axios.delete(`${serverURL}/users/user`, {params: {email}})
             .then(res => resolve(res.data.damp))
             .catch(err => reject(err.response.data.message));
-    })
+    });
 }
 
 export function signOut() {
@@ -75,16 +75,21 @@ export function signOut() {
     window.location.reload();
 }
 
-async function handleAuthentication(token: string) {
+function handleAuthentication(token: string) {
     localStorage.setItem('token', token);
-    await updateAuthData();
+    updateAuthData();
 }
 
-export async function updateAuthData() {
+function updateAuthData() {
     const token = localStorage.getItem('token');
     isAuthenticated = token !== null;
     if (isAuthenticated) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+}
+
+export async function updateAccessData() {
+    if (isAuthenticated) {
         try {
             const userAccessReq = await axios.get(`${serverURL}/users/access-self`);
             userAccess = userAccessReq.data.data;
@@ -96,3 +101,5 @@ export async function updateAuthData() {
         }
     }
 }
+
+updateAuthData();
