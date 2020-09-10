@@ -100,6 +100,7 @@ export async function updateAccessData() {
         } catch (e) {
             if (e.response.status === 401) {
                 signOut();
+                return;
             }
             alert(e.response.data.message);
         }

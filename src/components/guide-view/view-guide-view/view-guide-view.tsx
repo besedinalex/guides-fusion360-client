@@ -57,23 +57,24 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
 
     fillModalWindow(part: PartGuide) {
         let type = '';
-        if (/https?:\/\/(www\.)?(\w+\.)+(\w+)(\/(\w+|\?*|=*|\.)+)*/gi.test(part.content)) { // YouTube Video
+        if (/https?:\/\/(www\.)?(\w+\.)+(\w+)(\/(\w+|\?*|=*|\.)+)*/gi.test(part.content)) { // URL link
             type = 'video';
-        } else if (/.+\.zip/gi.test(part.content)) { // Archive
+        } else if (/.+\.zip/gi.test(part.content)) { // ZIP file
             type = 'archive';
-        } else {
+        } else if (/.+\.pdf/gi.test(part.content)) { // PDF file
             type = 'pdf';
         }
+        this.setState({
+            currentGuideName: part.name,
+            currentGuideContent: part.content,
+            currentGuideType: type,
+            currentGuideFile: ''
+        });
         if (type === 'archive' || type === 'pdf') {
             getGuideFile(this.state.guideId, part.content)
                 .then(data => this.setState({currentGuideFile: data}))
                 .catch(message => alert(message));
         }
-        this.setState({
-            currentGuideName: part.name,
-            currentGuideContent: part.content,
-            currentGuideType: type
-        });
     }
 
     modalWindowContent = () => {
