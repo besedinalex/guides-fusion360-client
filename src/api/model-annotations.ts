@@ -1,12 +1,16 @@
 import axios from 'axios';
-import {serverURL} from "./server-address";
 import ModelAnnotation from "../interfaces/model-annotation";
 import {isAuthenticated} from "./user-data";
+
+// Dev server
+if (window.location.port === '3000') {
+    axios.defaults.baseURL = `http://${window.location.hostname}:4004`;
+}
 
 export function getModelAnnotations(modelId: number): Promise<ModelAnnotation[]> {
     return new Promise((resolve, reject) => {
         const route = isAuthenticated ? 'all' : 'all-public';
-        axios.get(`${serverURL}/model-annotations/${route}/${modelId}`)
+        axios.get(`/model-annotations/${route}/${modelId}`)
             .then(res => resolve(res.data.data))
             .catch(err => reject(err.response.data.message));
     });
@@ -14,7 +18,7 @@ export function getModelAnnotations(modelId: number): Promise<ModelAnnotation[]>
 
 export function postModelAnnotation(guideId: number, x: number, y: number, z: number, name: string, text: string): Promise<number> {
     return new Promise((resolve, reject) => {
-        axios.post(`${serverURL}/model-annotations/new`, {guideId, x, y, z, name, text})
+        axios.post(`/model-annotations/new`, {guideId, x, y, z, name, text})
             .then(res => resolve(res.data.data))
             .catch(err => reject(err.response.data.message));
     });
@@ -22,7 +26,7 @@ export function postModelAnnotation(guideId: number, x: number, y: number, z: nu
 
 export function deleteModelAnnotation(annotationId: number): Promise<null> {
     return new Promise((resolve, reject) => {
-        axios.delete(`${serverURL}/model-annotations/annotation/${annotationId}`)
+        axios.delete(`/model-annotations/annotation/${annotationId}`)
             .then(res => resolve(res.data.data))
             .catch(err => reject(err.response.data.message));
     });

@@ -1,13 +1,17 @@
 import axios from 'axios';
-import {serverURL} from './server-address';
 import User from "../interfaces/user";
+
+// Dev server
+if (window.location.port === '3000') {
+    axios.defaults.baseURL = `http://${window.location.hostname}:4004`;
+}
 
 export let isAuthenticated: boolean;
 export let userAccess: string;
 
 export function getToken(email: string, password: string): Promise<null> {
     return new Promise((resolve, reject) => {
-        axios.get(`${serverURL}/users/token`, {params: {email, password}})
+        axios.get(`/users/token`, {params: {email, password}})
             .then(res => {
                 handleAuthentication(res.data.data);
                 resolve();
@@ -18,7 +22,7 @@ export function getToken(email: string, password: string): Promise<null> {
 
 export function postNewUser(firstName: string, lastName: string, email: string, password: string): Promise<null> {
     return new Promise((resolve, reject) => {
-        axios.post(`${serverURL}/users/new`, {email, firstName, lastName, password})
+        axios.post(`/users/new`, {email, firstName, lastName, password})
             .then(res => {
                 handleAuthentication(res.data.data);
                 resolve();
@@ -29,7 +33,7 @@ export function postNewUser(firstName: string, lastName: string, email: string, 
 
 export function getPasswordRestoreCode(email: string): Promise<string> {
     return new Promise((resolve, reject) => {
-        axios.get(`${serverURL}/users/password-restore-code`, {params: {email}})
+        axios.get(`/users/password-restore-code`, {params: {email}})
             .then(res => resolve(res.data.data))
             .catch(err => reject(err.response.data.message));
     })
@@ -37,7 +41,7 @@ export function getPasswordRestoreCode(email: string): Promise<string> {
 
 export function restorePassword(restoreCode: string, password: string): Promise<any> {
     return new Promise((resolve, reject) => {
-        axios.put(`${serverURL}/users/restore-password`, null, {params: {restoreCode, password}})
+        axios.put(`/users/restore-password`, null, {params: {restoreCode, password}})
             .then(res => {
                 handleAuthentication(res.data.data);
                 resolve();
@@ -48,7 +52,7 @@ export function restorePassword(restoreCode: string, password: string): Promise<
 
 export function getAllUsers(): Promise<User[]> {
     return new Promise((resolve, reject) => {
-        axios.get(`${serverURL}/users/all`)
+        axios.get(`/users/all`)
             .then(res => resolve(res.data.data))
             .catch(err => reject(err.response.data.message));
     });
@@ -56,7 +60,7 @@ export function getAllUsers(): Promise<User[]> {
 
 export function updateUserAccess(email: string, access: string): Promise<string> {
     return new Promise((resolve, reject) => {
-        axios.put(`${serverURL}/users/access`, {email, access})
+        axios.put(`/users/access`, {email, access})
             .then(res => resolve(res.data.data))
             .catch(err => reject(err.response.data.message));
     });
@@ -64,7 +68,7 @@ export function updateUserAccess(email: string, access: string): Promise<string>
 
 export function deleteUser(email: string): Promise<number> {
     return new Promise((resolve, reject) => {
-        axios.delete(`${serverURL}/users/user`, {params: {email}})
+        axios.delete(`/users/user`, {params: {email}})
             .then(res => resolve(res.data.damp))
             .catch(err => reject(err.response.data.message));
     });
@@ -91,7 +95,7 @@ function updateAuthData() {
 export async function updateAccessData() {
     if (isAuthenticated) {
         try {
-            const userAccessReq = await axios.get(`${serverURL}/users/access-self`);
+            const userAccessReq = await axios.get(`/users/access-self`);
             userAccess = userAccessReq.data.data;
         } catch (e) {
             if (e.response.status === 401) {
