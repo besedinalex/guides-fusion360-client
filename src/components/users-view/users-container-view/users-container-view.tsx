@@ -13,21 +13,27 @@ interface State {
 
 export default class UsersContainerView extends Component<RouteComponentProps, State> {
 
+    private _isMounted: boolean;
+
     state = {
         users: [],
         redirect: false
     }
 
-    componentDidMount() {
-        getAllUsers()
-            .then(users => {
-                users.sort((a, b) => a.access < b.access ? -1 : a.access > b.access ? 1 : 0);
-                this.setState({users});
-            })
-            .catch(message => {
-                alert(message);
-                this.setState({redirect: true});
-            });
+    async componentDidMount() {
+        this._isMounted = true;
+        try {
+            const users = await getAllUsers();
+            users.sort((a, b) => a.access < b.access ? -1 : a.access > b.access ? 1 : 0);
+            this._isMounted && this.setState({users});
+        } catch (message) {
+            alert(message);
+            this._isMounted && this.setState({redirect: true});
+        }
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
     }
 
     render() {

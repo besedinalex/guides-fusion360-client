@@ -15,7 +15,9 @@ interface State {
 
 export default class CreateGuideView extends Component<{}, State> {
 
+    private _isMounted: boolean;
     imgInput: React.RefObject<any>;
+
     state = {
         name: '',
         description: '',
@@ -25,10 +27,15 @@ export default class CreateGuideView extends Component<{}, State> {
     };
 
     componentDidMount() {
+        this._isMounted = true;
         this.imgInput = React.createRef();
         if (userAccess !== 'editor' && userAccess !== 'admin') {
             this.setState({redirect: true});
         }
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
     }
 
     handleImgChange = event => {
@@ -56,7 +63,7 @@ export default class CreateGuideView extends Component<{}, State> {
             alert('Необходимо дать описание гайду.');
         } else {
             postNewGuide(this.state.name, this.state.description, this.imgInput.current.files[0])
-                .then(() => this.setState({redirectSuccess: true}))
+                .then(() => this._isMounted && this.setState({redirectSuccess: true}))
                 .catch(message => alert(message));
         }
     };

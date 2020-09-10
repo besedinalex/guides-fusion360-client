@@ -15,6 +15,8 @@ interface State {
 
 export default class PdfViewerView extends Component<RouteComponentProps, State> {
 
+    private _isMounted: boolean;
+
     state = {
         redirect: false,
         guideId: null,
@@ -24,21 +26,23 @@ export default class PdfViewerView extends Component<RouteComponentProps, State>
     }
 
     async componentDidMount() {
+        this._isMounted = true;
         // @ts-ignore
         const guideId = Number(this.props.match.params.id);
         this.setState({guideId});
         const filename = new URLSearchParams(window.location.search).get('filename');
         try {
             const pdfBase64 = await getGuideFile(guideId, filename);
-            this.setState({pdfFile: URL.createObjectURL(base64ToBlob(pdfBase64))});
+            this._isMounted && this.setState({pdfFile: URL.createObjectURL(base64ToBlob(pdfBase64))});
         } catch (message) {
             alert(message);
-            this.setState({redirect: true});
+            this._isMounted && this.setState({redirect: true});
         }
         window.addEventListener('resize', this.onWindowResize);
     }
 
     componentWillUnmount() {
+        this._isMounted = false;
         window.removeEventListener('resize', this.onWindowResize);
     }
 

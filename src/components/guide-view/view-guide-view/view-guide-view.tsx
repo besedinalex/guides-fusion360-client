@@ -25,6 +25,8 @@ interface State {
 
 export default class ViewGuideView extends Component<RouteComponentProps, State> {
 
+    private _isMounted: boolean;
+
     state = {
         redirect: false,
         guideId: null,
@@ -38,20 +40,24 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
     };
 
     async componentDidMount() {
+        this._isMounted = true;
         // @ts-ignore
         const guideId = this.props.match.params.id;
         this.setState({guideId});
         try {
-            this.setState({preview: await getGuideFile(guideId, 'preview.png')});
+            const preview = await getGuideFile(guideId, 'preview.png');
+            this._isMounted && this.setState({preview});
         } catch {
-            this.setState({redirect: true});
+            this._isMounted && this.setState({redirect: true});
             return;
         }
-        this.setState({guides: await getPartGuidesSorted(guideId)});
-        this.setState({guideOwner: await getGuideOwnerInfo(guideId)});
+        const guides = await getPartGuidesSorted(guideId);
+        const guideOwner = await getGuideOwnerInfo(guideId);
+        this._isMounted && this.setState({guides, guideOwner});
     }
 
     componentWillUnmount() {
+        this._isMounted = false;
         $("#modal").modal("hide");
     }
 
@@ -72,7 +78,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
         });
         if (type === 'archive' || type === 'pdf') {
             getGuideFile(this.state.guideId, part.content)
-                .then(data => this.setState({currentGuideFile: data}))
+                .then(data => this._isMounted && this.setState({currentGuideFile: data}))
                 .catch(message => alert(message));
         }
     }

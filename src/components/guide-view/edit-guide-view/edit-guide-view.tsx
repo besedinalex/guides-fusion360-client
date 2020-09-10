@@ -28,7 +28,9 @@ interface State {
 
 export default class EditGuideView extends Component<RouteComponentProps, State> {
 
+    private _isMounted: boolean;
     fileInput: React.RefObject<any>;
+
     state = {
         redirect: false,
         removedRedirect: false,
@@ -45,21 +47,25 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
     }
 
     async componentDidMount() {
+        this._isMounted = true;
         // @ts-ignore
         const guideId = this.props.match.params.id;
         this.setState({guideId});
         try {
-            this.setState({preview: await getGuideFile(guideId, 'preview.png')});
+            const preview = await getGuideFile(guideId, 'preview.png');
+            this._isMounted && this.setState({preview});
         } catch {
-            this.setState({redirect: true});
+            this._isMounted && this.setState({redirect: true});
             return;
         }
         this.fileInput = React.createRef();
-        this.setState({guides: await getPartGuidesSorted(guideId)});
-        this.setState({guideOwner: await getGuideOwnerInfo(guideId)});
+        const guides = await getPartGuidesSorted(guideId);
+        const guideOwner = await getGuideOwnerInfo(guideId);
+        this._isMounted && this.setState({guides, guideOwner});
     }
 
     componentWillUnmount() {
+        this._isMounted = false;
         $("#modal").modal("hide");
     }
 
@@ -94,7 +100,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         // eslint-disable-next-line no-restricted-globals
         if (confirm(message)) {
             updateGuideVisibility(this.state.guideId, false)
-                .then(() => this.setState({redirect: true}))
+                .then(() => this._isMounted && this.setState({redirect: true}))
                 .catch(message => alert(message));
         }
     }
@@ -103,7 +109,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         // eslint-disable-next-line no-restricted-globals
         if (confirm('Вы уверены, что хотите удалить гайд?')) {
             removeGuide(this.state.guideId)
-                .then(() => this.setState({removedRedirect: true}))
+                .then(() => this._isMounted && this.setState({removedRedirect: true}))
                 .catch(message => alert(message));
         }
     }

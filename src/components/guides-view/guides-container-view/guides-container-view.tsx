@@ -18,6 +18,8 @@ interface Props {
 
 export default class GuidesContainerView extends Component<Props, State> {
 
+    private _isMounted: boolean;
+
     state = {
         hidden: false,
         guides: [],
@@ -25,15 +27,20 @@ export default class GuidesContainerView extends Component<Props, State> {
     };
 
     async componentDidMount() {
+        this._isMounted = true;
         const hidden = this.props.path === '/hidden';
         this.setState({hidden});
         try {
             const guides = hidden ? await getHiddenGuides() : await getPublicGuides();
-            this.setState({guides});
+            this._isMounted && this.setState({guides});
         } catch (message) {
             alert(message);
-            this.setState({redirect: hidden});
+            this._isMounted && this.setState({redirect: hidden});
         }
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
     }
 
     render() {

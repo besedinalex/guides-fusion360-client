@@ -15,6 +15,8 @@ interface State {
 
 export default class GuideCardComponent extends Component<Guide & Hidden, State> {
 
+    private _isMounted: boolean;
+
     state = {
         preview: ''
     }
@@ -29,7 +31,13 @@ export default class GuideCardComponent extends Component<Guide & Hidden, State>
     }
 
     componentDidMount() {
-        getGuideFile(this.props.id, 'preview.png').then(data => this.setState({preview: data}));
+        this._isMounted = true;
+        getGuideFile(this.props.id, 'preview.png')
+            .then(data => this._isMounted && this.setState({preview: data}));
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
     }
 
     render() {

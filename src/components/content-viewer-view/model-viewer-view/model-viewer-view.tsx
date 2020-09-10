@@ -23,6 +23,7 @@ interface State {
 
 export default class ModelViewerView extends Component<RouteComponentProps, State> {
 
+    private _isMounted: boolean;
     private host: HTMLElement;
     private scene: THREE.Scene;
     private renderer: THREE.WebGLRenderer;
@@ -42,6 +43,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
     };
 
     async componentDidMount() {
+        this._isMounted = true;
         // @ts-ignore
         const modelId = Number(this.props.match.params.id);
         this.setState({modelId});
@@ -50,7 +52,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
             model = await getGuideFile(modelId, 'model.glb');
         } catch (message) {
             alert(message);
-            this.setState({redirect: true});
+            this._isMounted && this.setState({redirect: true});
             return;
         }
 
@@ -88,6 +90,9 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         const gltfLoader = new GLTFLoader();
         gltfLoader.setDRACOLoader(new DRACOLoader().setDecoderPath(`https://www.gstatic.com/draco/v1/decoders/`));
         gltfLoader.load(model, loadedGLTF => {
+            if (!this._isMounted)
+                return;
+
             loadedGLTF.scene.children.map(obj => this.scene.add(obj));
 
             // Center any model
@@ -105,10 +110,12 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
 
         window.addEventListener('resize', this.onWindowResize);
 
-        await this.getAnnotations();
+        this.getAnnotations();
     }
 
     componentWillUnmount() {
+        this._isMounted = false;
+
         if (this.scene === undefined) {
             return;
         }
@@ -205,7 +212,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         getModelAnnotations(this.state.modelId)
             .then(annotations => {
                 annotations.map((annotation, i) => annotation.index = i + 1);
-                this.setState({annotations});
+                this._isMounted && this.setState({annotations});
             })
             .catch(message => console.log(message));
     }
