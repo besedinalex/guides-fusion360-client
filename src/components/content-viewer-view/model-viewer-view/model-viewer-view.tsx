@@ -19,6 +19,7 @@ interface State {
     mode: string;
     annotationName: string;
     annotationText: string;
+    modelLoaded: boolean;
 }
 
 export default class ModelViewerView extends Component<RouteComponentProps, State> {
@@ -39,7 +40,8 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         redirect: false,
         mode: 'view',
         annotationName: '',
-        annotationText: ''
+        annotationText: '',
+        modelLoaded: false
     };
 
     async componentDidMount() {
@@ -50,6 +52,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         let model;
         try {
             model = await getGuideFile(modelId, 'model.glb');
+            this._isMounted && this.setState({modelLoaded: true});
         } catch (message) {
             alert(message);
             this._isMounted && this.setState({redirect: true});
@@ -76,7 +79,7 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setClearColor(new THREE.Color(0xaaaaaa));
+        this.renderer.setClearColor(new THREE.Color(0xffffff));
         this.host.appendChild(this.renderer.domElement);
 
         this.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100000);
@@ -277,28 +280,44 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         }
     }
 
+    viewerButtons = () => (
+        <div>
+            <Link to="/" className="viewer-btn model-viewer-home">
+                <img className="viewer-btn-img" src={require('../../../assets/home.png')}
+                     alt="Return to home page" />
+            </Link>
+            <Link to={`/guide/${this.state.modelId}`} className="viewer-btn model-viewer-return">
+                <img className="viewer-btn-img" src={require('../../../assets/return.png')}
+                     alt="Return to guide page" />
+            </Link>
+
+            <div hidden={userAccess !== 'editor' && userAccess !== 'admin'}
+                 className="viewer-btn model-viewer-annotate" onClick={this.annotationButtonClicked}>
+                <img className="viewer-btn-img" src={require('../../../assets/annotate.png')}
+                     alt="Add annotation window" />
+            </div>
+        </div>
+    );
+
+
     render() {
         if (this.state.redirect) {
             return <Redirect to={`/guide/${this.state.modelId}`} />;
         }
 
+        if (!this.state.modelLoaded) {
+            return (
+                <div className="margin-after-header">
+                    {this.viewerButtons()}
+                    <h3 className="d-flex justify-content-center">Загрузка модели...</h3>
+                </div>
+            );
+        }
+
         return (
             <div className="viewer" ref={(host) => this.host = host} onClick={this.handleAddAnnotation}>
 
-                <Link to="/" className="viewer-btn model-viewer-home">
-                    <img className="viewer-btn-img" src={require('../../../assets/home.png')}
-                         alt="Return to home page" />
-                </Link>
-                <Link to={`/guide/${this.state.modelId}`} className="viewer-btn model-viewer-return">
-                    <img className="viewer-btn-img" src={require('../../../assets/return.png')}
-                         alt="Return to guide page" />
-                </Link>
-
-                <div hidden={userAccess !== 'editor' && userAccess !== 'admin'}
-                     className="viewer-btn model-viewer-annotate" onClick={this.annotationButtonClicked}>
-                    <img className="viewer-btn-img" src={require('../../../assets/annotate.png')}
-                         alt="Add annotation window" />
-                </div>
+                {this.viewerButtons()}
 
                 {this.annotationsMenu()}
 
@@ -310,9 +329,9 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
                             <p className="my-1">{annotation.text}</p>
                             <button hidden={userAccess !== 'editor' && userAccess !== 'admin'}
                                     className="btn btn-danger btn-sm" onClick={() => {
-                                        this.handleDeleteAnnotationClick(annotation.id)
-                                            .then(() => this.getAnnotations())
-                                            .catch(message => alert(message));
+                                this.handleDeleteAnnotationClick(annotation.id)
+                                    .then(() => this.getAnnotations())
+                                    .catch(message => alert(message));
                             }}>
                                 Удалить аннотацию
                             </button>
