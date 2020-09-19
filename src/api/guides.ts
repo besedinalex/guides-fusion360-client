@@ -14,7 +14,7 @@ export function getPublicGuides(): Promise<Guide[]> {
     return new Promise((resolve, reject) => {
         axios.get(`/guides/all`)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -22,7 +22,7 @@ export function getHiddenGuides(): Promise<Guide[]> {
     return new Promise((resolve, reject) => {
         axios.get(`/guides/all-hidden`)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -38,7 +38,7 @@ export function getGuideFile(guideId: number, filename: string): Promise<string>
             .catch(err => {
                 // Decodes arraybuffer to string and parses it for json object
                 const errResponse = JSON.parse(new TextDecoder("utf-8").decode(err.response.data));
-                reject(errResponse.message)
+                reject(errResponse.messageRu)
             });
     });
 }
@@ -48,7 +48,7 @@ export function getPartGuides(guideId: number): Promise<PartGuide[]> {
         const route = isAuthenticated ? 'parts' : 'parts-public';
         axios.get(`/guides/${route}/${guideId}`)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -56,7 +56,7 @@ export function getGuideOwner(guideId: number): Promise<User> {
     return new Promise((resolve, reject) => {
         axios.get(`/guides/owner/${guideId}`)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -69,7 +69,7 @@ export function postNewGuide(name: string, description: string, image: File): Pr
 
         axios.post(`/guides/guide`, bodyFormData)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -84,7 +84,7 @@ export function postNewPartGuide(guideId: number, name: string, data: File | str
 
         axios.post(`/guides/part-guide`, bodyFormData)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -96,7 +96,7 @@ export function postModel(guideId: number, file: File): Promise<number> {
 
         axios.post(`/guides/model`, bodyFormData)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -109,7 +109,7 @@ export function putPartGuide(id: number, name: string, content: string | File): 
 
         axios.put(`/guides/part-guide/${id}`, bodyFormData)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -117,7 +117,7 @@ export function putPartGuidesSortKey(partGuideId1: number, partGuideId2: number)
     return new Promise((resolve, reject) => {
         axios.put(`/guides/switch`, null, {params: {partGuideId1, partGuideId2}})
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -125,7 +125,7 @@ export function updateGuideVisibility(id: number, hidden: boolean): Promise<numb
     return new Promise((resolve, reject) => {
         axios.put(`/guides/hidden/${id}`, null, {params: {hidden}})
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -133,7 +133,7 @@ export function removeGuide(id: number): Promise<null> {
     return new Promise((resolve, reject) => {
         axios.delete(`/guides/guide/${id}`)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -141,6 +141,6 @@ export function removePartGuide(id: number): Promise<null> {
     return new Promise((resolve, reject) => {
         axios.delete(`/guides/part-guide/${id}`)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }

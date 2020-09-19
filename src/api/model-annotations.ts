@@ -12,7 +12,7 @@ export function getModelAnnotations(modelId: number): Promise<ModelAnnotation[]>
         const route = isAuthenticated ? 'all' : 'all-public';
         axios.get(`/model-annotations/${route}/${modelId}`)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -20,7 +20,7 @@ export function postModelAnnotation(guideId: number, x: number, y: number, z: nu
     return new Promise((resolve, reject) => {
         axios.post(`/model-annotations/new`, {guideId, x, y, z, name, text})
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -28,6 +28,6 @@ export function deleteModelAnnotation(annotationId: number): Promise<null> {
     return new Promise((resolve, reject) => {
         axios.delete(`/model-annotations/annotation/${annotationId}`)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }

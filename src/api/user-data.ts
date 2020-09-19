@@ -16,7 +16,7 @@ export function getToken(email: string, password: string): Promise<null> {
                 handleAuthentication(res.data.data);
                 resolve();
             })
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -27,7 +27,7 @@ export function postNewUser(firstName: string, lastName: string, email: string, 
                 handleAuthentication(res.data.data);
                 resolve();
             })
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -35,7 +35,7 @@ export function getPasswordRestoreCode(email: string): Promise<string> {
     return new Promise((resolve, reject) => {
         axios.get(`/users/password-restore-code`, {params: {email}})
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     })
 }
 
@@ -46,7 +46,7 @@ export function restorePassword(restoreCode: string, password: string): Promise<
                 handleAuthentication(res.data.data);
                 resolve();
             })
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -54,7 +54,7 @@ export function getAllUsers(): Promise<User[]> {
     return new Promise((resolve, reject) => {
         axios.get(`/users/all`)
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -62,7 +62,7 @@ export function updateUserAccess(email: string, access: string): Promise<string>
     return new Promise((resolve, reject) => {
         axios.put(`/users/access`, {email, access})
             .then(res => resolve(res.data.data))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -70,7 +70,7 @@ export function deleteUser(email: string): Promise<number> {
     return new Promise((resolve, reject) => {
         axios.delete(`/users/user`, {params: {email}})
             .then(res => resolve(res.data.damp))
-            .catch(err => reject(err.response.data.message));
+            .catch(err => reject(err.response.data.messageRu));
     });
 }
 
@@ -102,7 +102,7 @@ export async function updateAccessData() {
                 signOut();
                 return;
             }
-            alert(e.response.data.message);
+            alert(e.response.data.messageRu);
         }
     }
 }
