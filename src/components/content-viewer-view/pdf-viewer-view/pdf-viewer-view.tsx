@@ -53,13 +53,17 @@ export default class PdfViewerView extends Component<RouteComponentProps, State>
         });
     };
 
-    pdfViewer = () => {
-        if (this.state.pdfFile !== null) {
-            return (
-                <iframe src={this.state.pdfFile} className="pdf-viewer" title="pdf-viewer"
-                        width={this.state.windowWidth} height={this.state.windowHeight} />
-            );
-        }
+    viewerButtons = () => {
+        return (
+            <div>
+                <Link to="/" className="viewer-btn pdf-viewer-home">
+                    <img className="viewer-btn-img" src={require('../../../assets/home.png')} alt="Return home" />
+                </Link>
+                <Link to={`/guide/${this.state.guideId}`} className="viewer-btn pdf-viewer-return">
+                    <img className="viewer-btn-img" src={require('../../../assets/return.png')} alt="Return to guide" />
+                </Link>
+            </div>
+        );
     }
 
     render() {
@@ -67,16 +71,20 @@ export default class PdfViewerView extends Component<RouteComponentProps, State>
             return <Redirect to={`/guide/${this.state.guideId}`} />;
         }
 
+        if (this.state.pdfFile === null) {
+            return (
+                <div className="margin-after-header">
+                    {this.viewerButtons()}
+                    <h3 className="d-flex justify-content-center">Загрузка...</h3>
+                </div>
+            );
+        }
+
         return (
             <div className="viewer">
-                <Link to="/" className="viewer-btn pdf-viewer-home">
-                    <img className="viewer-btn-img" src={require('../../../assets/home.png')} alt="Return home" />
-                </Link>
-                <Link to={`/guide/${this.state.guideId}`} className="viewer-btn pdf-viewer-return">
-                    <img className="viewer-btn-img" src={require('../../../assets/return.png')} alt="Return to guide" />
-                </Link>
-
-                {this.pdfViewer()}
+                {this.viewerButtons()}
+                <iframe src={this.state.pdfFile} className="pdf-viewer" title="pdf-viewer"
+                        width={this.state.windowWidth} height={this.state.windowHeight} />
             </div>
         );
     }

@@ -69,6 +69,12 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         $("#modal").modal("hide");
     }
 
+    updateGuides = async () => {
+        const guides = await getPartGuidesSorted(this.state.guideId);
+        this._isMounted && this.setState({guides});
+        $("#modal").modal("hide");
+    }
+
     handleNameChange = event => this.setState({changedGuideName: event.target.value});
 
     handleVideoChange = event => this.setState({changedGuideVideoLink: event.target.value});
@@ -89,46 +95,53 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         this.handleGuidesSwitch(guide1.id, guide2.id);
     }
 
-    handleGuidesSwitch = (id1, id2) =>
-        putPartGuidesSortKey(id1, id2)
-            .then(async () => {
-                const guides = await getPartGuidesSorted(this.state.guideId);
-                this._isMounted && this.setState({guides});
-            })
-            .catch(message => alert(message));
+    handleGuidesSwitch = async (id1, id2) => {
+        try {
+            await putPartGuidesSortKey(id1, id2);
+            await this.updateGuides();
+        } catch (message) {
+            alert(message);
+        }
+    }
 
-    handlePublishGuide = () => {
+    handlePublishGuide = async () => {
         const message =
             'Вы уверены, что хотите опубликовать гайд? Гайд можно редактировать только когда он скрыт. ' +
             'Вы сможете скрыть его позже.';
         // eslint-disable-next-line no-restricted-globals
         if (confirm(message)) {
-            updateGuideVisibility(this.state.guideId, false)
-                .then(() => this._isMounted && this.setState({redirect: true}))
-                .catch(message => alert(message));
+            try {
+                await updateGuideVisibility(this.state.guideId, false);
+                this._isMounted && this.setState({redirect: true});
+            } catch (message) {
+                alert(message);
+            }
         }
     }
 
-    handleRemoveGuide = () => {
+    handleRemoveGuide = async () => {
         // eslint-disable-next-line no-restricted-globals
         if (confirm('Вы уверены, что хотите удалить гайд?')) {
-            removeGuide(this.state.guideId)
-                .then(() => this._isMounted && this.setState({removedRedirect: true}))
-                .catch(message => alert(message));
+            try {
+                await removeGuide(this.state.guideId);
+                this._isMounted && this.setState({removedRedirect: true})
+            } catch (message) {
+                alert(message);
+            }
         }
     }
 
-    handleRemovePartGuide = (event, id) => {
+    handleRemovePartGuide = async (event, id) => {
         event.stopPropagation();
-        removePartGuide(id)
-            .then(async () => {
-                const guides = await getPartGuidesSorted(this.state.guideId);
-                this._isMounted && this.setState({guides});
-            })
-            .catch(message => alert(message));
+        try {
+            await removePartGuide(id);
+            await this.updateGuides();
+        } catch (message) {
+            alert(message);
+        }
     }
 
-    handleSubmit = () => {
+    handleSubmit = async () => {
         // Poor validation
         if (this.state.currentMode === 'guide') {
             if (this.state.changedGuideName === '') { // Name check
@@ -156,23 +169,34 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
 
             const content = this.state.changedGuideVideoLink === '' ? this.fileInput.current.files[0] : this.state.changedGuideVideoLink;
             if (this.state.currentGuideId === 0) {
-                postNewPartGuide(this.state.guideId, this.state.changedGuideName, content, this.state.guides.length)
-                    .catch(message => alert(message))
-                    .finally(() => window.location.reload());
+                try {
+                    await postNewPartGuide(this.state.guideId, this.state.changedGuideName, content, this.state.guides.length);
+                } catch (message) {
+                    alert(message);
+                } finally {
+                    await this.updateGuides();
+                }
             } else {
-                putPartGuide(this.state.currentGuideId, this.state.changedGuideName, content)
-                    .catch(message => alert(message))
-                    .finally(() => window.location.reload());
+                try {
+                    await putPartGuide(this.state.currentGuideId, this.state.changedGuideName, content);
+                } catch (message) {
+                    alert(message);
+                } finally {
+                    await this.updateGuides();
+                }
             }
         } else { // model
             if (this.fileInput.current.files.length > 0) { // File chosen
                 alert('Загрузка модели может занять некоторое время. ' +
                     'Проверяйте результат загрузки путем открытия модели на странице гайда.' +
                     '\nНажмите ОК, чтобы продолжить.');
-                postModel(this.state.guideId, this.fileInput.current.files[0])
-                    .catch(message => alert(message));
+                try {
+                    await postModel(this.state.guideId, this.fileInput.current.files[0]);
+                } catch (message) {
+                    alert(message);
+                }
             } else {
-                alert('Необходимо выбрать STP файл для загрузки');
+                alert('Необходимо выбрать STP файл для загрузки.');
             }
         }
     };
@@ -231,6 +255,8 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                     <div className="list-group w-50 m-auto">
 
                         {this.state.guides.map((guide, i) => {
+                            const uppermost = i === 0;
+                            const bottommost = i === this.state.guides.length - 1;
                             return (
                                 <div className="list-group-item list-group-item-success" key={i}
                                      onClick={() => this.fillModalWindow('guide', guide)}>
@@ -241,14 +267,13 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                                             onClick={e => this.handleRemovePartGuide(e, guide.id)}>
                                         <Glyphicon glyph="remove" />
                                     </button>
-                                    <button className="float-right btn btn-sm m-0 mx-1 p-0"
-                                            disabled={i === this.state.guides.length - 1}
+                                    <button className="float-right btn btn-sm m-0 mx-1 p-0" disabled={bottommost}
                                             onClick={e => this.handleDownButton(e, i)}>
-                                        <Glyphicon glyph="chevron-down" />
+                                        <Glyphicon glyph="chevron-down" className={bottommost ? 'invisible' : ''} />
                                     </button>
-                                    <button className="float-right btn btn-sm m-0 mx-1 p-0" disabled={i === 0}
+                                    <button className="float-right btn btn-sm m-0 mx-1 p-0" disabled={uppermost}
                                             onClick={e => this.handleUpButton(e, i)}>
-                                        <Glyphicon glyph="chevron-up" />
+                                        <Glyphicon glyph="chevron-up" className={uppermost ? 'invisible' : ''} />
                                     </button>
                                 </div>
                             )

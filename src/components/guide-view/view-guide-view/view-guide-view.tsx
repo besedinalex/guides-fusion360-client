@@ -14,7 +14,7 @@ import './view-guide-view.sass';
 interface State {
     redirect: boolean;
     guideId: number;
-    guides: Array<PartGuide>;
+    guides: PartGuide[];
     currentGuideName: string;
     currentGuideContent: string;
     currentGuideType: string;
@@ -23,9 +23,15 @@ interface State {
     guideOwner: string;
 }
 
+interface LoadedGuide {
+    guideId: number;
+    guideFile: string;
+}
+
 export default class ViewGuideView extends Component<RouteComponentProps, State> {
 
     private _isMounted: boolean;
+    private loadedGuides: LoadedGuide[];
 
     state = {
         redirect: false,
@@ -41,6 +47,7 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
 
     async componentDidMount() {
         this._isMounted = true;
+        this.loadedGuides = [];
         // @ts-ignore
         const guideId = this.props.match.params.id;
         this.setState({guideId});
@@ -58,10 +65,11 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
 
     componentWillUnmount() {
         this._isMounted = false;
+        this.loadedGuides = [];
         $("#modal").modal("hide");
     }
 
-    fillModalWindow(part: PartGuide) {
+    async fillModalWindow(part: PartGuide) {
         this.setState({
             currentGuideName: part.name,
             currentGuideContent: part.content,
@@ -82,8 +90,18 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
             return;
         }
 
+        for (const obj of this.loadedGuides) {
+            if (obj.guideId === part.id) {
+                this._isMounted && this.setState({currentGuideFile: obj.guideFile, currentGuideType: type});
+                return;
+            }
+        }
+
         getGuideFile(this.state.guideId, part.content)
-            .then(data => this._isMounted && this.setState({currentGuideFile: data, currentGuideType: type}))
+            .then(data => {
+                this.loadedGuides.push({guideId: part.id, guideFile: data});
+                this._isMounted && this.setState({currentGuideFile: data, currentGuideType: type});
+            })
             .catch(message => {
                 alert(message);
                 this._isMounted && this.setState({currentGuideType: 'unknown'});
