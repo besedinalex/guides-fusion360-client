@@ -22,18 +22,23 @@ export default class UsersContainerView extends Component<RouteComponentProps, S
 
     async componentDidMount() {
         this._isMounted = true;
+        await this.getUsers();
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
+    }
+
+    getUsers = async () => {
         try {
             const users = await getAllUsers();
             users.sort((a, b) => a.access < b.access ? -1 : a.access > b.access ? 1 : 0);
+            this._isMounted && this.setState({users: []}); // If it's removed, users list won't update properly.
             this._isMounted && this.setState({users});
         } catch (message) {
             alert(message);
             this._isMounted && this.setState({redirect: true});
         }
-    }
-
-    componentWillUnmount() {
-        this._isMounted = false;
     }
 
     render() {
@@ -62,7 +67,8 @@ export default class UsersContainerView extends Component<RouteComponentProps, S
                             <tbody>
                                 {this.state.users.map((user, i) => {
                                     return <UserRowComponent email={user.email} firstName={user.firstName}
-                                                             lastName={user.lastName} access={user.access} key={i} />
+                                                             lastName={user.lastName} access={user.access}
+                                                             getUsers={async () => await this.getUsers()} key={i} />
                                 })}
                             </tbody>
                         </table>

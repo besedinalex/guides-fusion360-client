@@ -12,7 +12,11 @@ interface State {
     isAdmin: boolean;
 }
 
-export default class UserRowComponent extends Component<User, State> {
+interface Props {
+    getUsers(): void;
+}
+
+export default class UserRowComponent extends Component<User & Props, State> {
 
     state = {
         color: '',
@@ -56,7 +60,7 @@ export default class UserRowComponent extends Component<User, State> {
         // eslint-disable-next-line no-restricted-globals
         if (confirm(`Вы уверены, что хотите изменить уровень доступа пользователя ${this.props.firstName} ${this.props.lastName}?`)) {
             updateUserAccess(this.props.email, access)
-                .then(() => window.location.reload())
+                .then(() => this.props.getUsers())
                 .catch(message => alert(message));
         }
     }
@@ -73,7 +77,7 @@ export default class UserRowComponent extends Component<User, State> {
         // eslint-disable-next-line no-restricted-globals
         if (confirm(message)) {
             deleteUser(this.props.email)
-                .then(() => window.location.reload())
+                .then(() => this.props.getUsers())
                 .catch(message => alert(message));
         }
     }

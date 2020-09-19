@@ -75,23 +75,27 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
 
     handleFileChange = () => this.setState({changedFileName: this.fileInput.current.files[0].name});
 
-    handleUpButton = index => {
+    handleUpButton = (event, index) => {
+        event.stopPropagation();
         const guide1 = this.state.guides[index];
         const guide2 = this.state.guides[index - 1];
         this.handleGuidesSwitch(guide1.id, guide2.id);
     }
 
-    handleDownButton = index => {
+    handleDownButton = (event, index) => {
+        event.stopPropagation();
         const guide1 = this.state.guides[index];
         const guide2 = this.state.guides[index + 1];
         this.handleGuidesSwitch(guide1.id, guide2.id);
     }
 
-    handleGuidesSwitch = (id1, id2) => {
+    handleGuidesSwitch = (id1, id2) =>
         putPartGuidesSortKey(id1, id2)
-            .catch(message => alert(message))
-            .finally(() => window.location.reload());
-    }
+            .then(async () => {
+                const guides = await getPartGuidesSorted(this.state.guideId);
+                this._isMounted && this.setState({guides});
+            })
+            .catch(message => alert(message));
 
     handlePublishGuide = () => {
         const message =
@@ -114,11 +118,15 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
         }
     }
 
-    handleRemovePartGuide = id =>
+    handleRemovePartGuide = (event, id) => {
+        event.stopPropagation();
         removePartGuide(id)
-            .catch(message => alert(message))
-            .finally(() => window.location.reload());
-
+            .then(async () => {
+                const guides = await getPartGuidesSorted(this.state.guideId);
+                this._isMounted && this.setState({guides});
+            })
+            .catch(message => alert(message));
+    }
 
     handleSubmit = () => {
         // Poor validation
@@ -170,6 +178,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
     };
 
     fillModalWindow = (mode, guide?) => {
+        $("#modal").modal("show");
         this.setState({currentMode: mode});
         if (guide === undefined) {
             this.setState({
@@ -223,22 +232,22 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
 
                         {this.state.guides.map((guide, i) => {
                             return (
-                                <div className="list-group-item list-group-item-success" key={i} data-toggle="modal"
-                                     data-target="#modal" onClick={() => this.fillModalWindow('guide', guide)}>
+                                <div className="list-group-item list-group-item-success" key={i}
+                                     onClick={() => this.fillModalWindow('guide', guide)}>
                                     <span className="float-left">
                                         {guide.name}
                                     </span>
                                     <button className="float-right btn btn-sm m-0 mx-1 p-0"
-                                            onClick={() => this.handleRemovePartGuide(guide.id)}>
+                                            onClick={e => this.handleRemovePartGuide(e, guide.id)}>
                                         <Glyphicon glyph="remove" />
                                     </button>
                                     <button className="float-right btn btn-sm m-0 mx-1 p-0"
                                             disabled={i === this.state.guides.length - 1}
-                                            onClick={() => this.handleDownButton(i)}>
+                                            onClick={e => this.handleDownButton(e, i)}>
                                         <Glyphicon glyph="chevron-down" />
                                     </button>
                                     <button className="float-right btn btn-sm m-0 mx-1 p-0" disabled={i === 0}
-                                            onClick={() => this.handleUpButton(i)}>
+                                            onClick={e => this.handleUpButton(e, i)}>
                                         <Glyphicon glyph="chevron-up" />
                                     </button>
                                 </div>
