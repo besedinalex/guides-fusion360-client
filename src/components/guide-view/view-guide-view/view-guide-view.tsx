@@ -62,25 +62,32 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
     }
 
     fillModalWindow(part: PartGuide) {
-        let type = '';
-        if (/https?:\/\/(www\.)?(\w+\.)+(\w+)(\/(\w+|\?*|=*|\.)+)*/gi.test(part.content)) { // URL link
-            type = 'video';
-        } else if (/.+\.zip/gi.test(part.content)) { // ZIP file
-            type = 'archive';
-        } else if (/.+\.pdf/gi.test(part.content)) { // PDF file
-            type = 'pdf';
-        }
         this.setState({
             currentGuideName: part.name,
             currentGuideContent: part.content,
-            currentGuideType: type,
+            currentGuideType: 'loading',
             currentGuideFile: ''
         });
-        if (type === 'archive' || type === 'pdf') {
-            getGuideFile(this.state.guideId, part.content)
-                .then(data => this._isMounted && this.setState({currentGuideFile: data}))
-                .catch(message => alert(message));
+
+        let type = '';
+        if (/.+\.zip/gi.test(part.content)) { // ZIP file
+            type = 'archive';
+        } else if (/.+\.pdf/gi.test(part.content)) { // PDF file
+            type = 'pdf';
+        } else if (/https?:\/\/(www\.)?(\w+\.)+(\w+)(\/(\w+|\?*|=*|\.)+)*/gi.test(part.content)) { // URL link
+            this.setState({currentGuideType: 'video'});
+            return;
+        } else {
+            this.setState({currentGuideType: 'unknown'});
+            return;
         }
+
+        getGuideFile(this.state.guideId, part.content)
+            .then(data => this._isMounted && this.setState({currentGuideFile: data, currentGuideType: type}))
+            .catch(message => {
+                alert(message);
+                this._isMounted && this.setState({currentGuideType: 'unknown'});
+            });
     }
 
     modalWindowContent = () => {
@@ -111,10 +118,16 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
                         <iframe src={data} title='PDF guide' className="w-100 h-100" />
                     </div>
                 );
+            case 'loading':
+                return (
+                    <div className="modal-body" id="modal-body">
+                        <h3 className="text-center mt-3">Загрузка...</h3>
+                    </div>
+                );
             default:
                 return (
                     <div className="modal-body" id="modal-body">
-                        <h3 className="text-center mt-3">Неизвестный формат гайда.</h3>
+                        <h3 className="text-center mt-3">Не удалось отобразить гайд.</h3>
                     </div>
                 );
         }

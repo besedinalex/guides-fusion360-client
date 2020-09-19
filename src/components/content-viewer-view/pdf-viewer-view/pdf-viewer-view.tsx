@@ -53,6 +53,15 @@ export default class PdfViewerView extends Component<RouteComponentProps, State>
         });
     };
 
+    pdfViewer = () => {
+        if (this.state.pdfFile !== null) {
+            return (
+                <iframe src={this.state.pdfFile} className="pdf-viewer" title="pdf-viewer"
+                        width={this.state.windowWidth} height={this.state.windowHeight} />
+            );
+        }
+    }
+
     render() {
         if (this.state.redirect) {
             return <Redirect to={`/guide/${this.state.guideId}`} />;
@@ -67,8 +76,7 @@ export default class PdfViewerView extends Component<RouteComponentProps, State>
                     <img className="viewer-btn-img" src={require('../../../assets/return.png')} alt="Return to guide" />
                 </Link>
 
-                <iframe src={this.state.pdfFile} className="pdf-viewer" title="pdf-viewer"
-                        width={this.state.windowWidth} height={this.state.windowHeight} />
+                {this.pdfViewer()}
             </div>
         );
     }
