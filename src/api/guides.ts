@@ -1,8 +1,6 @@
 import axios from 'axios';
-import Guide from "../interfaces/guide";
-import PartGuide from "../interfaces/part-guide";
+import {Guide, PartGuide, User} from '../types';
 import {isAuthenticated} from "./user-data";
-import User from "../interfaces/user";
 import {arrayBufferToBase64} from "../services/base64";
 
 // Dev server

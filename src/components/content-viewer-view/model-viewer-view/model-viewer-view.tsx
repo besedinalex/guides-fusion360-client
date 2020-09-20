@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {DRACOLoader} from "three/examples/jsm/loaders/DRACOLoader";
-import ModelAnnotation from "../../../interfaces/model-annotation";
+import {ModelAnnotation} from "../../../types";
 import {deleteModelAnnotation, getModelAnnotations, postModelAnnotation} from "../../../api/model-annotations";
 import {getGuideFile} from "../../../api/guides";
 import {userAccess} from "../../../api/user-data";

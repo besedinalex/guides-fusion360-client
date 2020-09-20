@@ -1,5 +1,5 @@
 import axios from 'axios';
-import ModelAnnotation from "../interfaces/model-annotation";
+import {ModelAnnotation} from "../types";
 import {isAuthenticated} from "./user-data";
 
 // Dev server

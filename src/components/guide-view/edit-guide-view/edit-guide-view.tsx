@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import Glyphicon from '@strongdm/glyphicon';
 import HeaderComponent from "../../header-component/header-component";
-import PartGuide from "../../../interfaces/part-guide";
+import {PartGuide} from "../../../types";
 import {Link, Redirect, RouteComponentProps} from "react-router-dom";
 import {userAccess} from "../../../api/user-data";
 import $ from "jquery";

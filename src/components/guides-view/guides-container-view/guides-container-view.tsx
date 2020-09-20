@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import HeaderComponent from "../../header-component/header-component";
 import FooterComponent from "../../footer-component/footer-component";
 import GuideCardComponent from "../guide-card-component/guide-card-component";
-import Guide from "../../../interfaces/guide";
+import {Guide} from '../../../types';
 import {getPublicGuides, getHiddenGuides} from "../../../api/guides";
 import {Redirect} from "react-router-dom";
 

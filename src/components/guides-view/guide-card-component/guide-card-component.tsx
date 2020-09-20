@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {Link} from "react-router-dom";
-import Guide from "../../../interfaces/guide";
+import {Guide} from '../../../types';
 import {getGuideFile, updateGuideVisibility} from "../../../api/guides";
 import {userAccess} from "../../../api/user-data";
 import './guide-card-component.sass'

@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import User from '../../../interfaces/user';
+import {User} from "../../../types";
 import Glyphicon from '@strongdm/glyphicon';
 import {deleteUser, getPasswordRestoreCode, updateUserAccess} from "../../../api/user-data";
 

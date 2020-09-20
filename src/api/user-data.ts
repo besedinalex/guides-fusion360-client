@@ -1,5 +1,5 @@
 import axios from 'axios';
-import User from "../interfaces/user";
+import {User} from "../types";
 
 // Dev server
 if (window.location.port === '3000') {

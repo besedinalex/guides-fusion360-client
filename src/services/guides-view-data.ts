@@ -1,6 +1,6 @@
 import {userAccess} from "../api/user-data";
 import {getGuideOwner, getPartGuides} from "../api/guides";
-import PartGuide from "../interfaces/part-guide";
+import {PartGuide} from "../types";
 
 export async function getPartGuidesSorted(guideId: number): Promise<PartGuide[]> {
     try {

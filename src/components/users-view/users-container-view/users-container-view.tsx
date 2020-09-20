@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import User from "../../../interfaces/user";
+import {User} from "../../../types";
 import {getAllUsers} from "../../../api/user-data";
 import HeaderComponent from "../../header-component/header-component";
 import FooterComponent from "../../footer-component/footer-component";
