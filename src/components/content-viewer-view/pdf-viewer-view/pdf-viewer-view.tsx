@@ -4,6 +4,7 @@ import {getGuideFile} from "../../../api/guides";
 import {base64ToBlob} from "../../../services/base64";
 import './../content-viewer-view.sass';
 import './pdf-viewer-view.sass';
+import {addPartGuideFile, getPartGuideFile} from "../../../services/loaded-files";
 
 interface State {
     redirect: boolean;
@@ -31,13 +32,17 @@ export default class PdfViewerView extends Component<RouteComponentProps, State>
         const guideId = Number(this.props.match.params.id);
         this.setState({guideId});
         const filename = new URLSearchParams(window.location.search).get('filename');
-        try {
-            const pdfBase64 = await getGuideFile(guideId, filename);
-            this._isMounted && this.setState({pdfFile: URL.createObjectURL(base64ToBlob(pdfBase64))});
-        } catch (message) {
-            alert(message);
-            this._isMounted && this.setState({redirect: true});
+        let partGuideFile = getPartGuideFile(guideId, filename);
+        if (partGuideFile === null) {
+            try {
+                partGuideFile = await getGuideFile(guideId, filename);
+                addPartGuideFile(guideId, filename, partGuideFile);
+            } catch (message) {
+                alert(message);
+                this._isMounted && this.setState({redirect: true});
+            }
         }
+        this._isMounted && this.setState({pdfFile: URL.createObjectURL(base64ToBlob(partGuideFile))});
         window.addEventListener('resize', this.onWindowResize);
     }
 

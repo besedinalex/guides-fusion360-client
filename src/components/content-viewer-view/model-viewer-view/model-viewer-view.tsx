@@ -11,6 +11,7 @@ import {getGuideFile} from "../../../api/guides";
 import {userAccess} from "../../../api/user-data";
 import './model-viewer-view.sass';
 import './../content-viewer-view.sass';
+import {addModelFile, getModelFile} from "../../../services/loaded-files";
 
 interface State {
     modelId: number;
@@ -49,15 +50,22 @@ export default class ModelViewerView extends Component<RouteComponentProps, Stat
         // @ts-ignore
         const modelId = Number(this.props.match.params.id);
         this.setState({modelId});
-        let model;
-        try {
-            model = await getGuideFile(modelId, 'model.glb');
-            this._isMounted && this.setState({modelLoaded: true});
-        } catch (message) {
-            alert(message);
-            this._isMounted && this.setState({redirect: true});
-            return;
+        let model = getModelFile(modelId);
+        if (model === null) {
+            try {
+                model = await getGuideFile(modelId, 'model.glb');
+                addModelFile(modelId, model);
+            } catch (message) {
+                alert(message);
+                this._isMounted && this.setState({redirect: true});
+                return;
+            }
+        } else {
+            // If the model is preloaded, it will not give a chance for a host to initialize before I will use it later
+            // in this method. That's why I need to free thread from here so render() could run before it proceeds here.
+            await (1);
         }
+        this._isMounted && this.setState({modelLoaded: true});
 
         this.scene = new THREE.Scene();
 

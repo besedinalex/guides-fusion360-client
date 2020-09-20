@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import {RouteComponentProps, Redirect, Link} from "react-router-dom";
 import HeaderComponent from "../../header-component/header-component";
-import PartGuide from "../../../interfaces/part-guide";
+import {PartGuide} from "../../../types";
 import {getGuideFile} from "../../../api/guides";
 import FooterComponent from "../../footer-component/footer-component";
 import {base64ToBlob} from "../../../services/base64";
@@ -9,6 +9,7 @@ import Glyphicon from '@strongdm/glyphicon';
 import $ from 'jquery';
 import {userAccess} from "../../../api/user-data";
 import {getGuideOwnerInfo, getPartGuidesSorted} from "../../../services/guides-view-data";
+import {addPartGuideFile, addPreviewImage, getPartGuideFile, getPreviewImage} from "../../../services/loaded-files";
 import './view-guide-view.sass';
 
 interface State {
@@ -23,15 +24,9 @@ interface State {
     guideOwner: string;
 }
 
-interface LoadedGuide {
-    guideId: number;
-    guideFile: string;
-}
-
 export default class ViewGuideView extends Component<RouteComponentProps, State> {
 
     private _isMounted: boolean;
-    private loadedGuides: LoadedGuide[];
 
     state = {
         redirect: false,
@@ -47,17 +42,20 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
 
     async componentDidMount() {
         this._isMounted = true;
-        this.loadedGuides = [];
         // @ts-ignore
-        const guideId = this.props.match.params.id;
+        const guideId = Number(this.props.match.params.id);
         this.setState({guideId});
-        try {
-            const preview = await getGuideFile(guideId, 'preview.png');
-            this._isMounted && this.setState({preview});
-        } catch {
-            this._isMounted && this.setState({redirect: true});
-            return;
+        let preview = getPreviewImage(guideId);
+        if (preview === null) {
+            try {
+                preview = await getGuideFile(guideId, 'preview.png');
+                addPreviewImage(guideId, preview);
+            } catch {
+                this._isMounted && this.setState({redirect: true});
+                return;
+            }
         }
+        this._isMounted && this.setState({preview});
         const guides = await getPartGuidesSorted(guideId);
         const guideOwner = await getGuideOwnerInfo(guideId);
         this._isMounted && this.setState({guides, guideOwner});
@@ -65,7 +63,6 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
 
     componentWillUnmount() {
         this._isMounted = false;
-        this.loadedGuides = [];
         $("#modal").modal("hide");
     }
 
@@ -90,22 +87,18 @@ export default class ViewGuideView extends Component<RouteComponentProps, State>
             return;
         }
 
-        for (const obj of this.loadedGuides) {
-            if (obj.guideId === part.id) {
-                this._isMounted && this.setState({currentGuideFile: obj.guideFile, currentGuideType: type});
+        let partGuideFile = getPartGuideFile(this.state.guideId, part.content);
+        if (partGuideFile === null) {
+            try {
+                partGuideFile = await getGuideFile(this.state.guideId, part.content);
+                addPartGuideFile(this.state.guideId, part.content, partGuideFile);
+            } catch (message) {
+                alert(message);
+                this._isMounted && this.setState({currentGuideType: 'unknown'});
                 return;
             }
         }
-
-        getGuideFile(this.state.guideId, part.content)
-            .then(data => {
-                this.loadedGuides.push({guideId: part.id, guideFile: data});
-                this._isMounted && this.setState({currentGuideFile: data, currentGuideType: type});
-            })
-            .catch(message => {
-                alert(message);
-                this._isMounted && this.setState({currentGuideType: 'unknown'});
-            });
+        this._isMounted && this.setState({currentGuideFile: partGuideFile, currentGuideType: type});
     }
 
     modalWindowContent = () => {

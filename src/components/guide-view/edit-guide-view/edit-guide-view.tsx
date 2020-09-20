@@ -10,6 +10,7 @@ import {
     getGuideFile, postModel, postNewPartGuide, putPartGuide, putPartGuidesSortKey, removeGuide, removePartGuide,
     updateGuideVisibility
 } from "../../../api/guides";
+import {addPreviewImage, getPreviewImage, removeModelFile, removePartGuideFile} from "../../../services/loaded-files";
 
 interface State {
     redirect: boolean;
@@ -49,19 +50,23 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
     async componentDidMount() {
         this._isMounted = true;
         // @ts-ignore
-        const guideId = this.props.match.params.id;
+        const guideId = Number(this.props.match.params.id);
         this.setState({guideId});
-        try {
-            const preview = await getGuideFile(guideId, 'preview.png');
-            this._isMounted && this.setState({preview});
-        } catch {
-            this._isMounted && this.setState({redirect: true});
-            return;
+        let preview = getPreviewImage(guideId);
+        if (preview === null) {
+            try {
+                preview = await getGuideFile(guideId, 'preview.png');
+                addPreviewImage(guideId, preview);
+            } catch {
+                this._isMounted && this.setState({redirect: true});
+                return;
+            }
         }
-        this.fileInput = React.createRef();
+        this._isMounted && this.setState({preview});
         const guides = await getPartGuidesSorted(guideId);
         const guideOwner = await getGuideOwnerInfo(guideId);
         this._isMounted && this.setState({guides, guideOwner});
+        this.fileInput = React.createRef();
     }
 
     componentWillUnmount() {
@@ -168,7 +173,7 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
             }
 
             const content = this.state.changedGuideVideoLink === '' ? this.fileInput.current.files[0] : this.state.changedGuideVideoLink;
-            if (this.state.currentGuideId === 0) {
+            if (this.state.currentGuideId === 0) { // New guide
                 try {
                     await postNewPartGuide(this.state.guideId, this.state.changedGuideName, content, this.state.guides.length);
                 } catch (message) {
@@ -176,22 +181,25 @@ export default class EditGuideView extends Component<RouteComponentProps, State>
                 } finally {
                     await this.updateGuides();
                 }
-            } else {
+            } else { // Update guide
                 try {
                     await putPartGuide(this.state.currentGuideId, this.state.changedGuideName, content);
+                    removePartGuideFile(this.state.guideId, content);
                 } catch (message) {
                     alert(message);
                 } finally {
                     await this.updateGuides();
                 }
             }
-        } else { // model
+        } else { // New model (it always re-writes existing one since there's only one)
             if (this.fileInput.current.files.length > 0) { // File chosen
                 alert('Загрузка модели может занять некоторое время. ' +
                     'Проверяйте результат загрузки путем открытия модели на странице гайда.' +
                     '\nНажмите ОК, чтобы продолжить.');
+                $("#modal").modal("hide");
                 try {
                     await postModel(this.state.guideId, this.fileInput.current.files[0]);
+                    removeModelFile(this.state.guideId);
                 } catch (message) {
                     alert(message);
                 }

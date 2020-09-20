@@ -4,6 +4,7 @@ import {Guide} from '../../../types';
 import {getGuideFile, updateGuideVisibility} from "../../../api/guides";
 import {userAccess} from "../../../api/user-data";
 import './guide-card-component.sass'
+import {addPreviewImage, getPreviewImage} from "../../../services/loaded-files";
 
 interface Hidden {
     hidden: boolean;
@@ -30,10 +31,14 @@ export default class GuideCardComponent extends Component<Guide & Hidden, State>
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this._isMounted = true;
-        getGuideFile(this.props.id, 'preview.png')
-            .then(data => this._isMounted && this.setState({preview: data}));
+        let previewImage = getPreviewImage(this.props.id);
+        if (previewImage === null) {
+            previewImage = await getGuideFile(this.props.id, 'preview.png');
+            addPreviewImage(this.props.id, previewImage);
+        }
+        this._isMounted && this.setState({preview: previewImage});
     }
 
     componentWillUnmount() {
